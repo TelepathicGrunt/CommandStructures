@@ -100,7 +100,7 @@ public class StructureSpawnCommand {
                 level.getChunkSource().getGenerator(),
                 level.getChunkSource().getGenerator().getBiomeSource(),
                 level.getSeed(),
-                new ChunkPos(centerPos),
+                randomSeed == null ? new ChunkPos(centerPos) : new ChunkPos(0, 0),
                 newConfig,
                 level,
                 (b) -> true,
