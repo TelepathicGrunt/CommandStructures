@@ -3,6 +3,7 @@ package com.telepathicgrunt.commandstructures;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
+import com.mojang.brigadier.arguments.LongArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.tree.LiteralCommandNode;
@@ -64,9 +65,9 @@ public class StructureSpawnCommand {
                 generateStructure(cs.getArgument(poolArg, String.class), cs.getArgument(depthArg, Integer.class), cs.getArgument(heightmapArg, Boolean.class), cs.getArgument(legacyBoundsArg, Boolean.class), null, cs);
                 return 1;
             })
-            .then(Commands.argument(randomSeed, IntegerArgumentType.integer())
+            .then(Commands.argument(randomSeed, LongArgumentType.longArg())
             .executes(cs -> {
-                generateStructure(cs.getArgument(poolArg, String.class), cs.getArgument(depthArg, Integer.class), cs.getArgument(heightmapArg, Boolean.class), cs.getArgument(legacyBoundsArg, Boolean.class), cs.getArgument(randomSeed, Integer.class), cs);
+                generateStructure(cs.getArgument(poolArg, String.class), cs.getArgument(depthArg, Integer.class), cs.getArgument(heightmapArg, Boolean.class), cs.getArgument(legacyBoundsArg, Boolean.class), cs.getArgument(randomSeed, Long.class), cs);
                 return 1;
             })
         ))))));
@@ -81,7 +82,7 @@ public class StructureSpawnCommand {
         return structureStartPoolRL.stream();
     }
 
-    private static void generateStructure(String structureStartPoolRL, int depth, boolean heightmapSnap, boolean legacyBoundingBoxRule, Integer randomSeed, CommandContext<CommandSourceStack> cs) {
+    private static void generateStructure(String structureStartPoolRL, int depth, boolean heightmapSnap, boolean legacyBoundingBoxRule, Long randomSeed, CommandContext<CommandSourceStack> cs) {
         ServerLevel level = cs.getSource().getLevel();
         Entity entity = cs.getSource().getEntity();
         BlockPos centerPos = level.getSharedSpawnPos();
@@ -127,15 +128,16 @@ public class StructureSpawnCommand {
                             new WorldgenRandom(new LegacyRandomSource(0L)),
                             newContext.seed()));
 
-            WorldgenRandom worldgenrandom = new WorldgenRandom(new XoroshiroRandomSource(RandomSupport.seedUniquifier()));
-            long i;
+            WorldgenRandom worldgenrandom;
             if(randomSeed == null) {
-                i = worldgenrandom.setDecorationSeed(newContext.seed(), centerPos.getX(), centerPos.getZ());
+                worldgenrandom = new WorldgenRandom(new XoroshiroRandomSource(RandomSupport.seedUniquifier()));
+                long i = worldgenrandom.setDecorationSeed(newContext.seed(), centerPos.getX(), centerPos.getZ());
+                worldgenrandom.setFeatureSeed(i, 0, 0);
             }
             else {
-                i = worldgenrandom.setDecorationSeed(newContext.seed(), randomSeed, randomSeed);
+                worldgenrandom = new WorldgenRandom(new LegacyRandomSource(randomSeed));
             }
-            worldgenrandom.setFeatureSeed(i, 0, 0);
+
             BlockPos finalCenterPos = centerPos;
             structurepiecesbuilder.build().pieces().forEach(piece -> piece.postProcess(
                     level,
