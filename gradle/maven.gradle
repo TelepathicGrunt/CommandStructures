@@ -1,0 +1,46 @@
+jar.finalizedBy('reobfJar')
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            artifact jar
+
+            pom {
+                name = 'CommandStructures-Forge'
+                description = 'spawn structures by command'
+                url = 'https://github.com/TelepathicGrunt/CommandStructures-Forge'
+
+                scm {
+                    connection = 'git:https://github.com/TelepathicGrunt/CommandStructures-Forge.git'
+                    developerConnection = 'git:https://github.com/TelepathicGrunt/CommandStructures-Forge.git'
+                    url = 'https://github.com/TelepathicGrunt/CommandStructures-Forge'
+                }
+
+                licenses {
+                    license {
+                        name = 'MIT'
+                        url = 'https://github.com/TelepathicGrunt/CommandStructures-Forge/LICENSE'
+                    }
+                }
+
+                developers {
+                    developer {
+                        id = 'telepathic_grunt'
+                        name = 'TelepathicGrunt'
+                        email = 'asarnesespam@gmail.com'
+                    }
+                }
+            }
+        }
+    }
+
+    repositories {
+        maven {
+            url = uri("https://nexus.resourcefulbees.com/repository/telepathicgrunt/")
+            credentials {
+                username "$System.env.MAVEN_USER"
+                password "$System.env.MAVEN_PASS"
+            }
+        }
+    }
+}

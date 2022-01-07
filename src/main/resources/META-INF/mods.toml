@@ -6,6 +6,8 @@ license="MIT License"
 modId="command_structures" #mandatory
 version="${file.jarVersion}" #mandatory
 displayName="Command Structure Mod" #mandatory
+logoFile="commandstructures.png"
+logoBlur=false
 authors="TelepathicGrunt" #optional
 description='''
 Spawn structures by command
