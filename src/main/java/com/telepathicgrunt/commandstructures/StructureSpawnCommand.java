@@ -39,31 +39,37 @@ public class StructureSpawnCommand {
         String depthArg = "depth";
         String heightmapArg = "heightmapsnap";
         String legacyBoundsArg = "legacyboundingboxrule";
+        String randomSeed = "randomseed";
 
         LiteralCommandNode<CommandSourceStack> source = dispatcher.register(Commands.literal(commandString)
             .requires((permission) -> permission.hasPermission(2))
             .then(Commands.argument(poolArg, StringArgumentType.string())
             .suggests((ctx, sb) -> SharedSuggestionProvider.suggest(startPoolSuggestions(ctx), sb))
             .executes(cs -> {
-                generateStructure(cs.getArgument(poolArg, String.class), 10, false, false, cs);
+                generateStructure(cs.getArgument(poolArg, String.class), 10, false, false, null, cs);
                 return 1;
             })
             .then(Commands.argument(depthArg, IntegerArgumentType.integer())
             .executes(cs -> {
-                generateStructure(cs.getArgument(poolArg, String.class), cs.getArgument(depthArg, Integer.class), false, false, cs);
+                generateStructure(cs.getArgument(poolArg, String.class), cs.getArgument(depthArg, Integer.class), false, false, null, cs);
                 return 1;
             })
             .then(Commands.argument(heightmapArg, BoolArgumentType.bool())
             .executes(cs -> {
-                generateStructure(cs.getArgument(poolArg, String.class), cs.getArgument(depthArg, Integer.class), cs.getArgument(heightmapArg, Boolean.class), false, cs);
+                generateStructure(cs.getArgument(poolArg, String.class), cs.getArgument(depthArg, Integer.class), cs.getArgument(heightmapArg, Boolean.class), false, null, cs);
                 return 1;
             })
             .then(Commands.argument(legacyBoundsArg, BoolArgumentType.bool())
             .executes(cs -> {
-                generateStructure(cs.getArgument(poolArg, String.class), cs.getArgument(depthArg, Integer.class), cs.getArgument(heightmapArg, Boolean.class), cs.getArgument(legacyBoundsArg, Boolean.class), cs);
+                generateStructure(cs.getArgument(poolArg, String.class), cs.getArgument(depthArg, Integer.class), cs.getArgument(heightmapArg, Boolean.class), cs.getArgument(legacyBoundsArg, Boolean.class), null, cs);
                 return 1;
             })
-        )))));
+            .then(Commands.argument(randomSeed, IntegerArgumentType.integer())
+            .executes(cs -> {
+                generateStructure(cs.getArgument(poolArg, String.class), cs.getArgument(depthArg, Integer.class), cs.getArgument(heightmapArg, Boolean.class), cs.getArgument(legacyBoundsArg, Boolean.class), cs.getArgument(randomSeed, Integer.class), cs);
+                return 1;
+            })
+        ))))));
 
         dispatcher.register(Commands.literal(commandString).redirect(source));
     }
@@ -75,7 +81,7 @@ public class StructureSpawnCommand {
         return structureStartPoolRL.stream();
     }
 
-    private static void generateStructure(String structureStartPoolRL, int depth, boolean heightmapSnap, boolean legacyBoundingBoxRule, CommandContext<CommandSourceStack> cs) {
+    private static void generateStructure(String structureStartPoolRL, int depth, boolean heightmapSnap, boolean legacyBoundingBoxRule, Integer randomSeed, CommandContext<CommandSourceStack> cs) {
         ServerLevel level = cs.getSource().getLevel();
         Entity entity = cs.getSource().getEntity();
         BlockPos centerPos = level.getSharedSpawnPos();
@@ -122,7 +128,13 @@ public class StructureSpawnCommand {
                             newContext.seed()));
 
             WorldgenRandom worldgenrandom = new WorldgenRandom(new XoroshiroRandomSource(RandomSupport.seedUniquifier()));
-            long i = worldgenrandom.setDecorationSeed(newContext.seed(), centerPos.getX(), centerPos.getZ());
+            long i;
+            if(randomSeed == null) {
+                i = worldgenrandom.setDecorationSeed(newContext.seed(), centerPos.getX(), centerPos.getZ());
+            }
+            else {
+                i = worldgenrandom.setDecorationSeed(newContext.seed(), randomSeed, randomSeed);
+            }
             worldgenrandom.setFeatureSeed(i, 0, 0);
             BlockPos finalCenterPos = centerPos;
             structurepiecesbuilder.build().pieces().forEach(piece -> piece.postProcess(
