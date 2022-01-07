@@ -16,7 +16,7 @@ String fileContents = new File("./", "CHANGELOG.md").text
 // Make sure it runs after build!
 task publishModrinth (type: TaskModrinthUpload){
     token = "$System.env.MODRINTH"
-    projectId = '38tpSycf'
+    projectId = 'WEfvvlnl'
     versionName = "CommandStructures-Forge"
     versionNumber = project.version
     uploadFile = jar
