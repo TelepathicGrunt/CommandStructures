@@ -4,12 +4,12 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.LongArgumentType;
-import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
+import net.minecraft.commands.arguments.ResourceLocationArgument;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
@@ -28,10 +28,8 @@ import net.minecraft.world.level.levelgen.structure.pieces.PieceGenerator;
 import net.minecraft.world.level.levelgen.structure.pieces.PieceGeneratorSupplier;
 import net.minecraft.world.level.levelgen.structure.pieces.StructurePiecesBuilder;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
-import java.util.stream.Stream;
+import java.util.Set;
 
 public class StructureSpawnCommand {
     public static void dataGenCommand(CommandDispatcher<CommandSourceStack> dispatcher) {
@@ -44,30 +42,30 @@ public class StructureSpawnCommand {
 
         LiteralCommandNode<CommandSourceStack> source = dispatcher.register(Commands.literal(commandString)
             .requires((permission) -> permission.hasPermission(2))
-            .then(Commands.argument(poolArg, StringArgumentType.string())
-            .suggests((ctx, sb) -> SharedSuggestionProvider.suggest(startPoolSuggestions(ctx), sb))
+            .then(Commands.argument(poolArg, ResourceLocationArgument.id())
+            .suggests((ctx, sb) -> SharedSuggestionProvider.suggestResource(startPoolSuggestions(ctx), sb))
             .executes(cs -> {
-                generateStructure(cs.getArgument(poolArg, String.class), 10, false, false, null, cs);
+                generateStructure(cs.getArgument(poolArg, ResourceLocation.class), 10, false, false, null, cs);
                 return 1;
             })
             .then(Commands.argument(depthArg, IntegerArgumentType.integer())
             .executes(cs -> {
-                generateStructure(cs.getArgument(poolArg, String.class), cs.getArgument(depthArg, Integer.class), false, false, null, cs);
+                generateStructure(cs.getArgument(poolArg, ResourceLocation.class), cs.getArgument(depthArg, Integer.class), false, false, null, cs);
                 return 1;
             })
             .then(Commands.argument(heightmapArg, BoolArgumentType.bool())
             .executes(cs -> {
-                generateStructure(cs.getArgument(poolArg, String.class), cs.getArgument(depthArg, Integer.class), cs.getArgument(heightmapArg, Boolean.class), false, null, cs);
+                generateStructure(cs.getArgument(poolArg, ResourceLocation.class), cs.getArgument(depthArg, Integer.class), cs.getArgument(heightmapArg, Boolean.class), false, null, cs);
                 return 1;
             })
             .then(Commands.argument(legacyBoundsArg, BoolArgumentType.bool())
             .executes(cs -> {
-                generateStructure(cs.getArgument(poolArg, String.class), cs.getArgument(depthArg, Integer.class), cs.getArgument(heightmapArg, Boolean.class), cs.getArgument(legacyBoundsArg, Boolean.class), null, cs);
+                generateStructure(cs.getArgument(poolArg, ResourceLocation.class), cs.getArgument(depthArg, Integer.class), cs.getArgument(heightmapArg, Boolean.class), cs.getArgument(legacyBoundsArg, Boolean.class), null, cs);
                 return 1;
             })
             .then(Commands.argument(randomSeed, LongArgumentType.longArg())
             .executes(cs -> {
-                generateStructure(cs.getArgument(poolArg, String.class), cs.getArgument(depthArg, Integer.class), cs.getArgument(heightmapArg, Boolean.class), cs.getArgument(legacyBoundsArg, Boolean.class), cs.getArgument(randomSeed, Long.class), cs);
+                generateStructure(cs.getArgument(poolArg, ResourceLocation.class), cs.getArgument(depthArg, Integer.class), cs.getArgument(heightmapArg, Boolean.class), cs.getArgument(legacyBoundsArg, Boolean.class), cs.getArgument(randomSeed, Long.class), cs);
                 return 1;
             })
         ))))));
@@ -75,14 +73,11 @@ public class StructureSpawnCommand {
         dispatcher.register(Commands.literal(commandString).redirect(source));
     }
 
-    private static Stream<String> startPoolSuggestions(CommandContext<CommandSourceStack> cs) {
-        List<String> structureStartPoolRL = new ArrayList<>();
-        cs.getSource().getLevel().registryAccess().registryOrThrow(Registry.TEMPLATE_POOL_REGISTRY)
-            .forEach(entry -> structureStartPoolRL.add("\"" + entry.getName() + "\""));
-        return structureStartPoolRL.stream();
+    private static Set<ResourceLocation> startPoolSuggestions(CommandContext<CommandSourceStack> cs) {
+        return cs.getSource().getLevel().registryAccess().registryOrThrow(Registry.TEMPLATE_POOL_REGISTRY).keySet();
     }
 
-    private static void generateStructure(String structureStartPoolRL, int depth, boolean heightmapSnap, boolean legacyBoundingBoxRule, Long randomSeed, CommandContext<CommandSourceStack> cs) {
+    private static void generateStructure(ResourceLocation structureStartPoolRL, int depth, boolean heightmapSnap, boolean legacyBoundingBoxRule, Long randomSeed, CommandContext<CommandSourceStack> cs) {
         ServerLevel level = cs.getSource().getLevel();
         Entity entity = cs.getSource().getEntity();
         BlockPos centerPos = level.getSharedSpawnPos();
@@ -90,8 +85,7 @@ public class StructureSpawnCommand {
         if(heightmapSnap) centerPos = centerPos.below(centerPos.getY());
 
         JigsawConfiguration newConfig = new JigsawConfiguration(
-                () -> level.registryAccess().ownedRegistryOrThrow(Registry.TEMPLATE_POOL_REGISTRY)
-                        .get(new ResourceLocation(structureStartPoolRL)),
+                () -> level.registryAccess().ownedRegistryOrThrow(Registry.TEMPLATE_POOL_REGISTRY).get(structureStartPoolRL),
                 depth
         );
 
