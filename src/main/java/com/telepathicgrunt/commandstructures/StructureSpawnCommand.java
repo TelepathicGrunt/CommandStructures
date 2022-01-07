@@ -12,6 +12,7 @@ import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.ResourceLocationArgument;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
+import net.minecraft.data.worldgen.ProcessorLists;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
@@ -22,14 +23,19 @@ import net.minecraft.world.level.levelgen.WorldgenRandom;
 import net.minecraft.world.level.levelgen.XoroshiroRandomSource;
 import net.minecraft.world.level.levelgen.feature.configurations.JigsawConfiguration;
 import net.minecraft.world.level.levelgen.feature.structures.JigsawPlacement;
+import net.minecraft.world.level.levelgen.feature.structures.SinglePoolElement;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.PoolElementStructurePiece;
+import net.minecraft.world.level.levelgen.structure.StructurePiece;
 import net.minecraft.world.level.levelgen.structure.pieces.PieceGenerator;
 import net.minecraft.world.level.levelgen.structure.pieces.PieceGeneratorSupplier;
 import net.minecraft.world.level.levelgen.structure.pieces.StructurePiecesBuilder;
+import net.minecraft.world.level.levelgen.structure.templatesystem.StructureProcessorList;
 
+import java.util.ArrayList;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Supplier;
 
 public class StructureSpawnCommand {
     public static void dataGenCommand(CommandDispatcher<CommandSourceStack> dispatcher) {
@@ -39,36 +45,42 @@ public class StructureSpawnCommand {
         String heightmapArg = "heightmapsnap";
         String legacyBoundsArg = "legacyboundingboxrule";
         String randomSeed = "randomseed";
+        String disableProcessors = "disableprocessors";
 
         LiteralCommandNode<CommandSourceStack> source = dispatcher.register(Commands.literal(commandString)
             .requires((permission) -> permission.hasPermission(2))
             .then(Commands.argument(poolArg, ResourceLocationArgument.id())
             .suggests((ctx, sb) -> SharedSuggestionProvider.suggestResource(startPoolSuggestions(ctx), sb))
             .executes(cs -> {
-                generateStructure(cs.getArgument(poolArg, ResourceLocation.class), 10, false, false, null, cs);
+                generateStructure(cs.getArgument(poolArg, ResourceLocation.class), 10, false, false, false, null, cs);
                 return 1;
             })
             .then(Commands.argument(depthArg, IntegerArgumentType.integer())
             .executes(cs -> {
-                generateStructure(cs.getArgument(poolArg, ResourceLocation.class), cs.getArgument(depthArg, Integer.class), false, false, null, cs);
+                generateStructure(cs.getArgument(poolArg, ResourceLocation.class), cs.getArgument(depthArg, Integer.class), false, false, false, null, cs);
                 return 1;
             })
             .then(Commands.argument(heightmapArg, BoolArgumentType.bool())
             .executes(cs -> {
-                generateStructure(cs.getArgument(poolArg, ResourceLocation.class), cs.getArgument(depthArg, Integer.class), cs.getArgument(heightmapArg, Boolean.class), false, null, cs);
+                generateStructure(cs.getArgument(poolArg, ResourceLocation.class), cs.getArgument(depthArg, Integer.class), cs.getArgument(heightmapArg, Boolean.class), false, false, null, cs);
                 return 1;
             })
             .then(Commands.argument(legacyBoundsArg, BoolArgumentType.bool())
             .executes(cs -> {
-                generateStructure(cs.getArgument(poolArg, ResourceLocation.class), cs.getArgument(depthArg, Integer.class), cs.getArgument(heightmapArg, Boolean.class), cs.getArgument(legacyBoundsArg, Boolean.class), null, cs);
+                generateStructure(cs.getArgument(poolArg, ResourceLocation.class), cs.getArgument(depthArg, Integer.class), cs.getArgument(heightmapArg, Boolean.class), cs.getArgument(legacyBoundsArg, Boolean.class), false, null, cs);
+                return 1;
+            })
+            .then(Commands.argument(disableProcessors, BoolArgumentType.bool())
+            .executes(cs -> {
+                generateStructure(cs.getArgument(poolArg, ResourceLocation.class), cs.getArgument(depthArg, Integer.class), cs.getArgument(heightmapArg, Boolean.class), cs.getArgument(legacyBoundsArg, Boolean.class), cs.getArgument(disableProcessors, Boolean.class), null, cs);
                 return 1;
             })
             .then(Commands.argument(randomSeed, LongArgumentType.longArg())
             .executes(cs -> {
-                generateStructure(cs.getArgument(poolArg, ResourceLocation.class), cs.getArgument(depthArg, Integer.class), cs.getArgument(heightmapArg, Boolean.class), cs.getArgument(legacyBoundsArg, Boolean.class), cs.getArgument(randomSeed, Long.class), cs);
+                generateStructure(cs.getArgument(poolArg, ResourceLocation.class), cs.getArgument(depthArg, Integer.class), cs.getArgument(heightmapArg, Boolean.class), cs.getArgument(legacyBoundsArg, Boolean.class), cs.getArgument(disableProcessors, Boolean.class), cs.getArgument(randomSeed, Long.class), cs);
                 return 1;
             })
-        ))))));
+        )))))));
 
         dispatcher.register(Commands.literal(commandString).redirect(source));
     }
@@ -77,7 +89,7 @@ public class StructureSpawnCommand {
         return cs.getSource().getLevel().registryAccess().registryOrThrow(Registry.TEMPLATE_POOL_REGISTRY).keySet();
     }
 
-    private static void generateStructure(ResourceLocation structureStartPoolRL, int depth, boolean heightmapSnap, boolean legacyBoundingBoxRule, Long randomSeed, CommandContext<CommandSourceStack> cs) {
+    private static void generateStructure(ResourceLocation structureStartPoolRL, int depth, boolean heightmapSnap, boolean legacyBoundingBoxRule, boolean disableProcessors, Long randomSeed, CommandContext<CommandSourceStack> cs) {
         ServerLevel level = cs.getSource().getLevel();
         Entity entity = cs.getSource().getEntity();
         BlockPos centerPos = level.getSharedSpawnPos();
@@ -133,15 +145,34 @@ public class StructureSpawnCommand {
             }
 
             BlockPos finalCenterPos = centerPos;
-            structurepiecesbuilder.build().pieces().forEach(piece -> piece.postProcess(
-                    level,
-                    level.structureFeatureManager(),
-                    newContext.chunkGenerator(),
-                    worldgenrandom,
-                    BoundingBox.infinite(),
-                    newContext.chunkPos(),
-                    finalCenterPos
-            ));
+
+            structurepiecesbuilder.build().pieces().forEach(piece -> {
+                if(disableProcessors) {
+                    if(piece instanceof PoolElementStructurePiece poolElementStructurePiece) {
+                        if(poolElementStructurePiece.getElement() instanceof SinglePoolElement singlePoolElement) {
+                            Supplier<StructureProcessorList> oldProcessorList = singlePoolElement.processors;
+                            singlePoolElement.processors = () -> ProcessorLists.EMPTY;
+                            generatePiece(level, newContext, worldgenrandom, finalCenterPos, piece);
+                            singlePoolElement.processors = oldProcessorList; // Set the processors back or else our change is permanent.
+                        }
+                    }
+                }
+                else {
+                    generatePiece(level, newContext, worldgenrandom, finalCenterPos, piece);
+                }
+            });
         }
+    }
+
+    private static void generatePiece(ServerLevel level, PieceGeneratorSupplier.Context<JigsawConfiguration> newContext, WorldgenRandom worldgenrandom, BlockPos finalCenterPos, StructurePiece piece) {
+        piece.postProcess(
+                level,
+                level.structureFeatureManager(),
+                newContext.chunkGenerator(),
+                worldgenrandom,
+                BoundingBox.infinite(),
+                newContext.chunkPos(),
+                finalCenterPos
+        );
     }
 }
