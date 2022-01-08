@@ -32,7 +32,6 @@ import net.minecraft.world.level.levelgen.structure.pieces.PieceGeneratorSupplie
 import net.minecraft.world.level.levelgen.structure.pieces.StructurePiecesBuilder;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureProcessorList;
 
-import java.util.ArrayList;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;

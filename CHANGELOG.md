@@ -1,3 +1,11 @@
+### **(V.1.2.0 Changes) (1.18.1 Minecraft)**
+
+##### Command:
+Optimized /spawnpieces arg more and will always place structure void where the structure piece had structure void.
+
+/spawnpieces now has a savepiece argument to auto save pieces to the world's generated folder.
+
+
 ### **(V.1.1.0 Changes) (1.18.1 Minecraft)**
 
 ##### Command:
