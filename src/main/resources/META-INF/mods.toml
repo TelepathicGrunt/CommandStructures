@@ -10,8 +10,7 @@ logoFile="commandstructures.png"
 logoBlur=false
 authors="TelepathicGrunt" #optional
 description='''
-Spawn structures by command
-'''
+Spawn structures by command'''
 
 # makes sure our mod does not be attempted to be ran on older version of Minecraft and explodes
 [[dependencies.command_structures]]

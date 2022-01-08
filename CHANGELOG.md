@@ -1,3 +1,9 @@
+### **(V.1.2.1 Changes) (1.18.1 Minecraft)**
+
+##### Misc:
+Fixed issue where mod cannot load in prod due to it checking for mixins config file that doesn't exist.
+
+
 ### **(V.1.2.0 Changes) (1.18.1 Minecraft)**
 
 ##### Command:
