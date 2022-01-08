@@ -24,7 +24,7 @@ Don't forget to change <modversion> with the actual latest version of this mod l
 &nbsp; ...
 
 
-&nbsp; implementation fg.deobf("com.telepathicgrunt:CommandStructures:<modversion>+1.18.1")
+&nbsp; runtimeOnly fg.deobf("com.telepathicgrunt:CommandStructures:<modversion>+1.18.1")
 
 
 }</blockquote>
