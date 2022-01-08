@@ -17,6 +17,7 @@ import net.minecraft.commands.arguments.coordinates.WorldCoordinates;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.world.entity.player.Player;
@@ -31,12 +32,16 @@ import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureManager;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 public class SpawnPiecesCommand {
+    private static MinecraftServer currentMinecraftServer = null;
+    private static Set<ResourceLocation> cachedSuggestion = new HashSet<>();
+
     public static void dataGenCommand(CommandDispatcher<CommandSourceStack> dispatcher) {
         String commandString = "spawnpieces";
         String rlArg = "resourcelocationpath";
@@ -90,11 +95,18 @@ public class SpawnPiecesCommand {
     }
 
     private static Set<ResourceLocation> templatePathsSuggestions(CommandContext<CommandSourceStack> cs) {
+        if(currentMinecraftServer == cs.getSource().getServer()) {
+            return cachedSuggestion;
+        }
+
         ResourceManager resourceManager = cs.getSource().getLevel().getServer().getResourceManager();
+        Set<String> modidStrings = new HashSet<>();
         Set<ResourceLocation> rlSet = resourceManager.listResources("structures", (filename) -> filename.endsWith(".nbt"))
                 .stream()
                 .map(resourceLocation -> {
                     String namespace = resourceLocation.getNamespace();
+                    modidStrings.add(namespace);
+
                     String path = resourceLocation.getPath()
                             .replaceAll("structures/", "")
                             .replaceAll(".nbt", "");
@@ -108,10 +120,12 @@ public class SpawnPiecesCommand {
                 .collect(Collectors.toSet());
 
         // add suggestion for entire mods/vanilla too
-        rlSet.addAll(rlSet.stream()
-                .map(resourceLocation -> new ResourceLocation(resourceLocation.getNamespace(), ""))
+        rlSet.addAll(modidStrings.stream()
+                .map(modid -> new ResourceLocation(modid, ""))
                 .collect(Collectors.toSet()));
 
+        currentMinecraftServer = cs.getSource().getServer();
+        cachedSuggestion = rlSet;
         return rlSet;
     }
 

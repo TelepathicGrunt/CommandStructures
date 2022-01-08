@@ -1,3 +1,9 @@
+## **(V.1.2.2 Changes) (1.18.1 Minecraft)**
+
+##### Command:
+Cached the suggestions for /spawnpieces command. Much less waiting after initial load of suggested folders to generate pieces from.
+
+
 ### **(V.1.2.1 Changes) (1.18.1 Minecraft)**
 
 ##### Misc:
