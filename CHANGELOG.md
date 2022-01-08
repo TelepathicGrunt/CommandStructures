@@ -3,6 +3,8 @@
 ##### Command:
 Added argument to allow disabling processors when generating structures.
 
+Added /spawnpieces command that was helped with by Patrigan! 
+
 
 ### **(V.1.0.1 Changes) (1.18.1 Minecraft)**
 
