@@ -16,7 +16,7 @@ For developers that want to add this mod to their mod's workspace:
 
 &nbsp;
 
-Don't forget to change <modversion> with the actual latest version of this mod like `1.1.0` for example.
+Don't forget to change <modversion> with the actual latest version of this mod like `1.2.0` for example.
 
 <blockquote>dependencies {
 
