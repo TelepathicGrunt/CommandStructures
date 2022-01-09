@@ -65,5 +65,8 @@ apply from: 'gradle/maven.gradle'
 apply from: 'gradle/curseforge.gradle'
 apply from: 'gradle/modrinth.gradle'
 
-task buildAndRelease{}
+task buildAndRelease {}
+tasks.publish.configure { mustRunAfter tasks.build }
+tasks.curseforge.configure { mustRunAfter tasks.publish }
+tasks.publishModrinth.configure { mustRunAfter tasks.publish }
 tasks.buildAndRelease.dependsOn(tasks.build, tasks.publish, tasks.curseforge, tasks.publishModrinth)
