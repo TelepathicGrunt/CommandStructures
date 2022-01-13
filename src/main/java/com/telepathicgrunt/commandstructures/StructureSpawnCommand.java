@@ -10,12 +10,13 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.ResourceLocationArgument;
+import net.minecraft.commands.arguments.coordinates.Coordinates;
+import net.minecraft.commands.arguments.coordinates.Vec3Argument;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.data.worldgen.ProcessorLists;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.levelgen.LegacyRandomSource;
 import net.minecraft.world.level.levelgen.RandomSupport;
@@ -39,6 +40,7 @@ import java.util.function.Supplier;
 public class StructureSpawnCommand {
     public static void dataGenCommand(CommandDispatcher<CommandSourceStack> dispatcher) {
         String commandString = "spawnstructure";
+        String locationArg = "location";
         String poolArg = "startpoolresourcelocation";
         String depthArg = "depth";
         String heightmapArg = "heightmapsnap";
@@ -48,38 +50,39 @@ public class StructureSpawnCommand {
 
         LiteralCommandNode<CommandSourceStack> source = dispatcher.register(Commands.literal(commandString)
             .requires((permission) -> permission.hasPermission(2))
+            .then(Commands.argument(locationArg, Vec3Argument.vec3())
             .then(Commands.argument(poolArg, ResourceLocationArgument.id())
             .suggests((ctx, sb) -> SharedSuggestionProvider.suggestResource(startPoolSuggestions(ctx), sb))
             .executes(cs -> {
-                generateStructure(cs.getArgument(poolArg, ResourceLocation.class), 10, false, false, false, null, cs);
+                generateStructure(Vec3Argument.getCoordinates(cs, locationArg), cs.getArgument(poolArg, ResourceLocation.class), 10, false, false, false, null, cs);
                 return 1;
             })
             .then(Commands.argument(depthArg, IntegerArgumentType.integer())
             .executes(cs -> {
-                generateStructure(cs.getArgument(poolArg, ResourceLocation.class), cs.getArgument(depthArg, Integer.class), false, false, false, null, cs);
+                generateStructure(Vec3Argument.getCoordinates(cs, locationArg), cs.getArgument(poolArg, ResourceLocation.class), cs.getArgument(depthArg, Integer.class), false, false, false, null, cs);
                 return 1;
             })
             .then(Commands.argument(heightmapArg, BoolArgumentType.bool())
             .executes(cs -> {
-                generateStructure(cs.getArgument(poolArg, ResourceLocation.class), cs.getArgument(depthArg, Integer.class), cs.getArgument(heightmapArg, Boolean.class), false, false, null, cs);
+                generateStructure(Vec3Argument.getCoordinates(cs, locationArg), cs.getArgument(poolArg, ResourceLocation.class), cs.getArgument(depthArg, Integer.class), cs.getArgument(heightmapArg, Boolean.class), false, false, null, cs);
                 return 1;
             })
             .then(Commands.argument(legacyBoundsArg, BoolArgumentType.bool())
             .executes(cs -> {
-                generateStructure(cs.getArgument(poolArg, ResourceLocation.class), cs.getArgument(depthArg, Integer.class), cs.getArgument(heightmapArg, Boolean.class), cs.getArgument(legacyBoundsArg, Boolean.class), false, null, cs);
+                generateStructure(Vec3Argument.getCoordinates(cs, locationArg), cs.getArgument(poolArg, ResourceLocation.class), cs.getArgument(depthArg, Integer.class), cs.getArgument(heightmapArg, Boolean.class), cs.getArgument(legacyBoundsArg, Boolean.class), false, null, cs);
                 return 1;
             })
             .then(Commands.argument(disableProcessors, BoolArgumentType.bool())
             .executes(cs -> {
-                generateStructure(cs.getArgument(poolArg, ResourceLocation.class), cs.getArgument(depthArg, Integer.class), cs.getArgument(heightmapArg, Boolean.class), cs.getArgument(legacyBoundsArg, Boolean.class), cs.getArgument(disableProcessors, Boolean.class), null, cs);
+                generateStructure(Vec3Argument.getCoordinates(cs, locationArg), cs.getArgument(poolArg, ResourceLocation.class), cs.getArgument(depthArg, Integer.class), cs.getArgument(heightmapArg, Boolean.class), cs.getArgument(legacyBoundsArg, Boolean.class), cs.getArgument(disableProcessors, Boolean.class), null, cs);
                 return 1;
             })
             .then(Commands.argument(randomSeed, LongArgumentType.longArg())
             .executes(cs -> {
-                generateStructure(cs.getArgument(poolArg, ResourceLocation.class), cs.getArgument(depthArg, Integer.class), cs.getArgument(heightmapArg, Boolean.class), cs.getArgument(legacyBoundsArg, Boolean.class), cs.getArgument(disableProcessors, Boolean.class), cs.getArgument(randomSeed, Long.class), cs);
+                generateStructure(Vec3Argument.getCoordinates(cs, locationArg), cs.getArgument(poolArg, ResourceLocation.class), cs.getArgument(depthArg, Integer.class), cs.getArgument(heightmapArg, Boolean.class), cs.getArgument(legacyBoundsArg, Boolean.class), cs.getArgument(disableProcessors, Boolean.class), cs.getArgument(randomSeed, Long.class), cs);
                 return 1;
             })
-        )))))));
+        ))))))));
 
         dispatcher.register(Commands.literal(commandString).redirect(source));
     }
@@ -88,11 +91,9 @@ public class StructureSpawnCommand {
         return cs.getSource().getLevel().registryAccess().registryOrThrow(Registry.TEMPLATE_POOL_REGISTRY).keySet();
     }
 
-    private static void generateStructure(ResourceLocation structureStartPoolRL, int depth, boolean heightmapSnap, boolean legacyBoundingBoxRule, boolean disableProcessors, Long randomSeed, CommandContext<CommandSourceStack> cs) {
+    private static void generateStructure(Coordinates coordinates, ResourceLocation structureStartPoolRL, int depth, boolean heightmapSnap, boolean legacyBoundingBoxRule, boolean disableProcessors, Long randomSeed, CommandContext<CommandSourceStack> cs) {
         ServerLevel level = cs.getSource().getLevel();
-        Entity entity = cs.getSource().getEntity();
-        BlockPos centerPos = level.getSharedSpawnPos();
-        if(entity != null) centerPos = entity.blockPosition();
+        BlockPos centerPos = coordinates.getBlockPos(cs.getSource());
         if(heightmapSnap) centerPos = centerPos.below(centerPos.getY());
 
         JigsawConfiguration newConfig = new JigsawConfiguration(
