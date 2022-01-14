@@ -21,5 +21,7 @@ public class CommandStructuresMain {
     private void registerCommand(RegisterCommandsEvent event) {
         StructureSpawnCommand.dataGenCommand(event.getDispatcher());
         SpawnPiecesCommand.dataGenCommand(event.getDispatcher());
+        ConfiguredFeatureSpawnCommand.dataGenCommand(event.getDispatcher());
+        PlacedFeatureSpawnCommand.dataGenCommand(event.getDispatcher());
     }
 }

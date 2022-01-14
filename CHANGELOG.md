@@ -3,6 +3,8 @@
 ##### Command:
 Added location argument to /spawnstructure command.
 
+Created /spawnfeature and /spawnplacedfeature commands.
+
 
 ## **(V.1.2.2 Changes) (1.18.1 Minecraft)**
 
