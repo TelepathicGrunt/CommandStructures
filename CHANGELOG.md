@@ -1,3 +1,9 @@
+## **(V.1.3.1 Changes) (1.18.1 Minecraft)**
+
+##### Command:
+/spawnstructure command will refresh chunks on clients now so all blocks are visible on client if it was placed strangely by modded serverside structure code
+
+
 ## **(V.1.3.0 Changes) (1.18.1 Minecraft)**
 
 ##### Command:

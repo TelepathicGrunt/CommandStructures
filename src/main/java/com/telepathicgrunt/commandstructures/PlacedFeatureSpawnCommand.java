@@ -13,12 +13,8 @@ import net.minecraft.commands.arguments.coordinates.Vec3Argument;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.protocol.game.ClientboundLevelChunkWithLightPacket;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.level.ChunkHolder;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.level.ChunkPos;
-import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.levelgen.placement.PlacedFeature;
 import net.minecraft.world.level.levelgen.placement.PlacementModifierType;
 
@@ -72,18 +68,6 @@ public class PlacedFeatureSpawnCommand {
 
         noBiomeCheckPlacedFeature.place(level, level.getChunkSource().getGenerator(), level.getRandom(), worldBottomPos);
 
-        for(ChunkHolder chunkholder : level.getChunkSource().chunkMap.getChunks()) {
-            LevelChunk levelChunk = chunkholder.getTickingChunk();
-            if(levelChunk != null) {
-                int viewDistance = level.getChunkSource().chunkMap.viewDistance;
-                ClientboundLevelChunkWithLightPacket lightPacket = new ClientboundLevelChunkWithLightPacket(levelChunk, level.getLightEngine(), null, null, true);
-                level.players().forEach(player -> {
-                    int distance = player.chunkPosition().getChessboardDistance(levelChunk.getPos());
-                    if(distance < viewDistance) {
-                        player.trackChunk(levelChunk.getPos(), lightPacket);
-                    }
-                });
-            }
-        }
+        Utilities.refreshChunksOnClients(level);
     }
 }

@@ -161,6 +161,8 @@ public class StructureSpawnCommand {
                     generatePiece(level, newContext, worldgenrandom, finalCenterPos, piece);
                 }
             });
+
+            Utilities.refreshChunksOnClients(level);
         }
     }
 
