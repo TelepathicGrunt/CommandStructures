@@ -1,4 +1,4 @@
-package com.telepathicgrunt.commandstructures;
+package com.telepathicgrunt.commandstructures.commands;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.BoolArgumentType;

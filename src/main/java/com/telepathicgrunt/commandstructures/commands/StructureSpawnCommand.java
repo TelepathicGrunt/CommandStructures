@@ -1,4 +1,4 @@
-package com.telepathicgrunt.commandstructures;
+package com.telepathicgrunt.commandstructures.commands;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.BoolArgumentType;
@@ -6,6 +6,7 @@ import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.LongArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.tree.LiteralCommandNode;
+import com.telepathicgrunt.commandstructures.Utilities;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
@@ -94,7 +95,6 @@ public class StructureSpawnCommand {
     private static void generateStructure(Coordinates coordinates, ResourceLocation structureStartPoolRL, int depth, boolean heightmapSnap, boolean legacyBoundingBoxRule, boolean disableProcessors, Long randomSeed, CommandContext<CommandSourceStack> cs) {
         ServerLevel level = cs.getSource().getLevel();
         BlockPos centerPos = coordinates.getBlockPos(cs.getSource());
-        if(heightmapSnap) centerPos = centerPos.below(centerPos.getY());
 
         JigsawConfiguration newConfig = new JigsawConfiguration(
                 () -> level.registryAccess().ownedRegistryOrThrow(Registry.TEMPLATE_POOL_REGISTRY).get(structureStartPoolRL),

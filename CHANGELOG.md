@@ -1,6 +1,8 @@
-## **(V.1.3.1 Changes) (1.18.1 Minecraft)**
+## **(V.1.4.0 Changes) (1.18.1 Minecraft)**
 
 ##### Command:
+Added /spawnrawstructure for trying to spawn configuredstructures. Some vanilla configuredstructures are hardcoded in the command so the command bypasses some of their annoying internal terrain/probability checks.
+
 /spawnstructure command will refresh chunks on clients now so all blocks are visible on client if it was placed strangely by modded serverside structure code
 
 

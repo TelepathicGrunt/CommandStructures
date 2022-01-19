@@ -1,8 +1,10 @@
-package com.telepathicgrunt.commandstructures;
+package com.telepathicgrunt.commandstructures.commands;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.tree.LiteralCommandNode;
+import com.telepathicgrunt.commandstructures.CommandStructuresMain;
+import com.telepathicgrunt.commandstructures.Utilities;
 import net.minecraft.commands.CommandRuntimeException;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
