@@ -1,6 +1,7 @@
 package com.telepathicgrunt.commandstructures.commands;
 
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.arguments.LongArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.tree.LiteralCommandNode;
@@ -48,12 +49,14 @@ import net.minecraft.world.level.levelgen.structure.pieces.StructurePiecesBuilde
 
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class RawStructureSpawnCommand {
     public static void dataGenCommand(CommandDispatcher<CommandSourceStack> dispatcher) {
         String commandString = "spawnrawstructure";
         String locationArg = "location";
         String cfRL = "configuredstructure";
+        String saveStructureBounds = "savestructurebounds";
         String randomSeed = "randomseed";
 
         LiteralCommandNode<CommandSourceStack> source = dispatcher.register(Commands.literal(commandString)
@@ -62,15 +65,20 @@ public class RawStructureSpawnCommand {
             .then(Commands.argument(cfRL, ResourceLocationArgument.id())
             .suggests((ctx, sb) -> SharedSuggestionProvider.suggestResource(startPoolSuggestions(ctx), sb))
             .executes(cs -> {
-                generateStructure(Vec3Argument.getCoordinates(cs, locationArg), cs.getArgument(cfRL, ResourceLocation.class), null, cs);
+                generateStructure(Vec3Argument.getCoordinates(cs, locationArg), cs.getArgument(cfRL, ResourceLocation.class), true, null, cs);
+                return 1;
+            })
+            .then(Commands.argument(saveStructureBounds, BoolArgumentType.bool())
+            .executes(cs -> {
+                generateStructure(Vec3Argument.getCoordinates(cs, locationArg), cs.getArgument(cfRL, ResourceLocation.class), cs.getArgument(saveStructureBounds, Boolean.class), null, cs);
                 return 1;
             })
             .then(Commands.argument(randomSeed, LongArgumentType.longArg())
             .executes(cs -> {
-                generateStructure(Vec3Argument.getCoordinates(cs, locationArg), cs.getArgument(cfRL, ResourceLocation.class), cs.getArgument(randomSeed, Long.class), cs);
+                generateStructure(Vec3Argument.getCoordinates(cs, locationArg), cs.getArgument(cfRL, ResourceLocation.class), cs.getArgument(saveStructureBounds, Boolean.class), cs.getArgument(randomSeed, Long.class), cs);
                 return 1;
             })
-        ))));
+        )))));
 
         dispatcher.register(Commands.literal(commandString).redirect(source));
     }
@@ -79,11 +87,11 @@ public class RawStructureSpawnCommand {
         return cs.getSource().getLevel().registryAccess().registryOrThrow(Registry.CONFIGURED_STRUCTURE_FEATURE_REGISTRY).keySet();
     }
 
-    private static void generateStructure(Coordinates coordinates, ResourceLocation cfRL, Long randomSeed, CommandContext<CommandSourceStack> cs) {
+    private static void generateStructure(Coordinates coordinates, ResourceLocation cfRL, boolean saveStructureBounds, Long randomSeed, CommandContext<CommandSourceStack> cs) {
         ServerLevel level = cs.getSource().getLevel();
         BlockPos centerPos = coordinates.getBlockPos(cs.getSource());
         ChunkPos chunkPos = new ChunkPos(centerPos);
-        ChunkAccess chunkAccess = level.getChunk(centerPos);
+        ChunkAccess chunkAccess = level.getChunk(chunkPos.x, chunkPos.z);
         SectionPos sectionpos = SectionPos.bottomOf(chunkAccess);
 
         WorldgenRandom worldgenrandom;
@@ -222,10 +230,16 @@ public class RawStructureSpawnCommand {
             );
         }
 
-
-
         structureStart.getPieces().forEach(piece -> generatePiece(level, worldgenrandom, centerPos, piece));
         level.structureFeatureManager().setStartForFeature(sectionpos, configuredStructureFeature.feature, structureStart, chunkAccess);
+
+        if(saveStructureBounds) {
+            Set<ChunkPos> chunkPosSet = structureStart.getPieces().stream().map(piece -> new ChunkPos(piece.getBoundingBox().getCenter())).collect(Collectors.toSet());
+            for(ChunkPos chunkPos1 : chunkPosSet) {
+                ChunkAccess chunkAccess1 = level.getChunk(chunkPos1.x, chunkPos1.z);
+                level.getChunkSource().getGenerator().createReferences(level, level.structureFeatureManager(), chunkAccess1);
+            }
+        }
 
         if(!structureStart.getPieces().isEmpty()) {
             Utilities.refreshChunksOnClients(level);
