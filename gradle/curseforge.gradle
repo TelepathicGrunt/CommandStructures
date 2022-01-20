@@ -1,17 +1,12 @@
-apply plugin: "com.matthewprenger.cursegradle"
+apply plugin: "net.darkhax.curseforgegradle"
 
-curseforge {
-    project {
-        apiKey = "$System.env.CURSEFORGEKEY"
-        id = "565119"
-        releaseType = "release"
-        changelogType = 'markdown'
-        changelog = file('CHANGELOG.md')
-        addGameVersion("1.18.1")
-        addGameVersion("Forge")
+task publishCurseForge(type: net.darkhax.curseforgegradle.TaskPublishCurseForge) {
+    apiToken = "$System.env.CURSEFORGEKEY"
+    projectId = "565119"
 
-        mainArtifact(jar) {
-            displayName = "CommandStructures-Forge v${project.mod_version} (${project.mc_version} MC)"
-        }
-    }
+    def mainFile = upload(projectId, jar)
+    mainFile.setChangelog(file("CHANGELOG.md"))
+    mainFile.changelogType = "markdown"
+    mainFile.releaseType = "release"
+    mainFile.displayName = "CommandStructures-Forge v${project.mod_version} (${project.mc_version} MC)"
 }
