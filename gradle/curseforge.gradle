@@ -2,7 +2,7 @@ apply plugin: "net.darkhax.curseforgegradle"
 
 task publishCurseForge(type: net.darkhax.curseforgegradle.TaskPublishCurseForge) {
     apiToken = "$System.env.CURSEFORGEKEY"
-    projectId = "565119"
+    projectId = 565119
 
     def mainFile = upload(projectId, jar)
     mainFile.setChangelog(file("CHANGELOG.md"))
