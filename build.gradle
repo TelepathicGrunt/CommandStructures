@@ -68,8 +68,8 @@ apply from: 'gradle/maven.gradle'
 apply from: 'gradle/modrinth.gradle'
 task publishCurseForge(type: net.darkhax.curseforgegradle.TaskPublishCurseForge) {
     apiToken = "$System.env.CURSEFORGEKEY"
-    def projectId = 565119
-    def changelogText = new File("CHANGELOG.md").getText('UTF-8')
+    int projectId = 565119
+    String changelogText = new File("CHANGELOG.md").getText('UTF-8')
 
     def mainFile = upload(projectId, jar)
     mainFile.setChangelog(changelogText)
