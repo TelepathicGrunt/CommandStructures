@@ -55,7 +55,13 @@ public class ConfiguredFeatureSpawnCommand {
             throw new CommandRuntimeException(new TextComponent(errorMsg));
         }
 
-        cf.place(level, level.getChunkSource().getGenerator(), level.getRandom(), centerPos);
+        boolean success = cf.place(level, level.getChunkSource().getGenerator(), level.getRandom(), centerPos);
+
+        if(!success) {
+            String errorMsg = configuredFeatureRL + " configuredfeature failed to be spawned. (It may have internal checks for valid spots)";
+            CommandStructuresMain.LOGGER.error(errorMsg);
+            throw new CommandRuntimeException(new TextComponent(errorMsg));
+        }
 
         Utilities.refreshChunksOnClients(level);
     }

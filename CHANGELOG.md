@@ -1,3 +1,9 @@
+## **(V.1.4.1 Changes) (1.18.1 Minecraft)**
+
+##### Command:
+Improved error message from all commands.
+
+
 ## **(V.1.4.0 Changes) (1.18.1 Minecraft)**
 
 ##### Command:

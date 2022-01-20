@@ -87,7 +87,7 @@ public class RawStructureSpawnCommand {
         return cs.getSource().getLevel().registryAccess().registryOrThrow(Registry.CONFIGURED_STRUCTURE_FEATURE_REGISTRY).keySet();
     }
 
-    private static void generateStructure(Coordinates coordinates, ResourceLocation cfRL, boolean saveStructureBounds, Long randomSeed, CommandContext<CommandSourceStack> cs) {
+    private static void generateStructure(Coordinates coordinates, ResourceLocation structureRL, boolean saveStructureBounds, Long randomSeed, CommandContext<CommandSourceStack> cs) {
         ServerLevel level = cs.getSource().getLevel();
         BlockPos centerPos = coordinates.getBlockPos(cs.getSource());
         ChunkPos chunkPos = new ChunkPos(centerPos);
@@ -103,10 +103,10 @@ public class RawStructureSpawnCommand {
             worldgenrandom = new WorldgenRandom(new LegacyRandomSource(randomSeed));
         }
 
-        ConfiguredStructureFeature<?, ?> configuredStructureFeature = level.registryAccess().ownedRegistryOrThrow(Registry.CONFIGURED_STRUCTURE_FEATURE_REGISTRY).get(cfRL);
+        ConfiguredStructureFeature<?, ?> configuredStructureFeature = level.registryAccess().ownedRegistryOrThrow(Registry.CONFIGURED_STRUCTURE_FEATURE_REGISTRY).get(structureRL);
 
         if (configuredStructureFeature == null) {
-            String errorMsg = cfRL + " ConfiguredStructureFeature does not exist in registry";
+            String errorMsg = structureRL + " ConfiguredStructureFeature does not exist in registry";
             CommandStructuresMain.LOGGER.error(errorMsg);
             throw new CommandRuntimeException(new TextComponent(errorMsg));
         }
@@ -243,6 +243,11 @@ public class RawStructureSpawnCommand {
 
         if(!structureStart.getPieces().isEmpty()) {
             Utilities.refreshChunksOnClients(level);
+        }
+        else {
+            String errorMsg = structureRL + " ConfiguredStructure failed to be spawned. (It may have internal checks for valid spots)";
+            CommandStructuresMain.LOGGER.error(errorMsg);
+            throw new CommandRuntimeException(new TextComponent(errorMsg));
         }
     }
 

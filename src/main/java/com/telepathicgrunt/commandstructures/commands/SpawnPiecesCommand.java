@@ -5,6 +5,8 @@ import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.tree.LiteralCommandNode;
+import com.telepathicgrunt.commandstructures.CommandStructuresMain;
+import net.minecraft.commands.CommandRuntimeException;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
@@ -15,6 +17,7 @@ import net.minecraft.commands.arguments.coordinates.Vec3Argument;
 import net.minecraft.commands.arguments.coordinates.WorldCoordinate;
 import net.minecraft.commands.arguments.coordinates.WorldCoordinates;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
@@ -135,6 +138,12 @@ public class SpawnPiecesCommand {
         BlockPos pos = coordinates.getBlockPos(cs.getSource());
 
         List<ResourceLocation> nbtRLs = getResourceLocations(player, level, path.getNamespace(), path.getPath());
+
+        if(nbtRLs.isEmpty()) {
+            String errorMsg = path + " path has no nbt pieces in it. No pieces will be placed.";
+            CommandStructuresMain.LOGGER.error(errorMsg);
+            throw new CommandRuntimeException(new TextComponent(errorMsg));
+        }
 
         // Size of area we will need
         int columnCount = rowlength;
