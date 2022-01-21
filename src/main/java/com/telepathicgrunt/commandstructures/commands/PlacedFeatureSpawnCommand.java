@@ -71,7 +71,7 @@ public class PlacedFeatureSpawnCommand {
         boolean success = noBiomeCheckPlacedFeature.place(level, level.getChunkSource().getGenerator(), level.getRandom(), worldBottomPos);
 
         if(!success) {
-            String errorMsg = placedFeatureRL + " placedfeature failed to be spawned. (It may have internal checks for valid spots)";
+            String errorMsg = placedFeatureRL + " placedfeature failed to be spawned. (It may have internal checks for valid spots or is chance based)";
             CommandStructuresMain.LOGGER.error(errorMsg);
             throw new CommandRuntimeException(new TextComponent(errorMsg));
         }

@@ -72,7 +72,7 @@ task publishCurseForge(type: net.darkhax.curseforgegradle.TaskPublishCurseForge)
     String changelogText = new File("CHANGELOG.md").getText('UTF-8')
 
     def mainFile = upload(projectId, jar)
-    mainFile.setChangelog(changelogText)
+    mainFile.changelog = changelogText
     mainFile.changelogType = "markdown"
     mainFile.releaseType = "release"
     mainFile.displayName = "CommandStructures-Forge v${project.mod_version} (${project.mc_version} MC)"

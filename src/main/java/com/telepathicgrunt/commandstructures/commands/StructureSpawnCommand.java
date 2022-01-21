@@ -186,6 +186,11 @@ public class StructureSpawnCommand {
                 throw new CommandRuntimeException(new TextComponent(errorMsg));
             }
         }
+        else {
+            String errorMsg = structureStartPoolRL + " Template Pool spawned no pieces.";
+            CommandStructuresMain.LOGGER.error(errorMsg);
+            throw new CommandRuntimeException(new TextComponent(errorMsg));
+        }
     }
 
     private static void generatePiece(ServerLevel level, PieceGeneratorSupplier.Context<JigsawConfiguration> newContext, WorldgenRandom worldgenrandom, BlockPos finalCenterPos, StructurePiece piece) {

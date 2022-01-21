@@ -206,9 +206,6 @@ public class SpawnPiecesCommand {
 
 
     private static List<ResourceLocation> getResourceLocations(Player player, ServerLevel world, String modId, String filter) {
-        if(player != null) {
-            player.displayClientMessage(new TranslatableComponent(" Working.... "), true);
-        }
         ResourceManager resourceManager = world.getServer().getResourceManager();
         return resourceManager.listResources("structures", (filename) -> filename.endsWith(".nbt"))
                 .stream()
