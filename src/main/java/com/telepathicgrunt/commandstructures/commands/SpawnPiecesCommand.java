@@ -245,7 +245,6 @@ public class SpawnPiecesCommand {
 
             mutable.move(0,0, spacing);
 
-
             // Move back to start of row
             if(pieceIndex % columnCount == 0) {
                 mutable.move(spacing,0, (-spacing * columnCount));

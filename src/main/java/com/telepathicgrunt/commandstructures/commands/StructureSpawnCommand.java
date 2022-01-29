@@ -51,8 +51,9 @@ public class StructureSpawnCommand {
         String depthArg = "depth";
         String heightmapArg = "heightmapsnap";
         String legacyBoundsArg = "legacyboundingboxrule";
-        String randomSeed = "randomseed";
         String disableProcessors = "disableprocessors";
+        String sendChunkLightingPacket = "sendchunklightingpacket";
+        String randomSeed = "randomseed";
 
         LiteralCommandNode<CommandSourceStack> source = dispatcher.register(Commands.literal(commandString)
             .requires((permission) -> permission.hasPermission(2))
@@ -60,35 +61,40 @@ public class StructureSpawnCommand {
             .then(Commands.argument(poolArg, ResourceLocationArgument.id())
             .suggests((ctx, sb) -> SharedSuggestionProvider.suggestResource(startPoolSuggestions(ctx), sb))
             .executes(cs -> {
-                generateStructure(Vec3Argument.getCoordinates(cs, locationArg), cs.getArgument(poolArg, ResourceLocation.class), 10, false, false, false, null, cs);
+                generateStructure(Vec3Argument.getCoordinates(cs, locationArg), cs.getArgument(poolArg, ResourceLocation.class), 10, false, false, false, false, null, cs);
                 return 1;
             })
             .then(Commands.argument(depthArg, IntegerArgumentType.integer())
             .executes(cs -> {
-                generateStructure(Vec3Argument.getCoordinates(cs, locationArg), cs.getArgument(poolArg, ResourceLocation.class), cs.getArgument(depthArg, Integer.class), false, false, false, null, cs);
+                generateStructure(Vec3Argument.getCoordinates(cs, locationArg), cs.getArgument(poolArg, ResourceLocation.class), cs.getArgument(depthArg, Integer.class), false, false, false, false, null, cs);
                 return 1;
             })
             .then(Commands.argument(heightmapArg, BoolArgumentType.bool())
             .executes(cs -> {
-                generateStructure(Vec3Argument.getCoordinates(cs, locationArg), cs.getArgument(poolArg, ResourceLocation.class), cs.getArgument(depthArg, Integer.class), cs.getArgument(heightmapArg, Boolean.class), false, false, null, cs);
+                generateStructure(Vec3Argument.getCoordinates(cs, locationArg), cs.getArgument(poolArg, ResourceLocation.class), cs.getArgument(depthArg, Integer.class), cs.getArgument(heightmapArg, Boolean.class), false, false, false, null, cs);
                 return 1;
             })
             .then(Commands.argument(legacyBoundsArg, BoolArgumentType.bool())
             .executes(cs -> {
-                generateStructure(Vec3Argument.getCoordinates(cs, locationArg), cs.getArgument(poolArg, ResourceLocation.class), cs.getArgument(depthArg, Integer.class), cs.getArgument(heightmapArg, Boolean.class), cs.getArgument(legacyBoundsArg, Boolean.class), false, null, cs);
+                generateStructure(Vec3Argument.getCoordinates(cs, locationArg), cs.getArgument(poolArg, ResourceLocation.class), cs.getArgument(depthArg, Integer.class), cs.getArgument(heightmapArg, Boolean.class), cs.getArgument(legacyBoundsArg, Boolean.class), false, false, null, cs);
                 return 1;
             })
             .then(Commands.argument(disableProcessors, BoolArgumentType.bool())
             .executes(cs -> {
-                generateStructure(Vec3Argument.getCoordinates(cs, locationArg), cs.getArgument(poolArg, ResourceLocation.class), cs.getArgument(depthArg, Integer.class), cs.getArgument(heightmapArg, Boolean.class), cs.getArgument(legacyBoundsArg, Boolean.class), cs.getArgument(disableProcessors, Boolean.class), null, cs);
+                generateStructure(Vec3Argument.getCoordinates(cs, locationArg), cs.getArgument(poolArg, ResourceLocation.class), cs.getArgument(depthArg, Integer.class), cs.getArgument(heightmapArg, Boolean.class), cs.getArgument(legacyBoundsArg, Boolean.class), cs.getArgument(disableProcessors, Boolean.class), false, null, cs);
+                return 1;
+            })
+            .then(Commands.argument(sendChunkLightingPacket, BoolArgumentType.bool())
+            .executes(cs -> {
+                generateStructure(Vec3Argument.getCoordinates(cs, locationArg), cs.getArgument(poolArg, ResourceLocation.class), cs.getArgument(depthArg, Integer.class), cs.getArgument(heightmapArg, Boolean.class), cs.getArgument(legacyBoundsArg, Boolean.class), cs.getArgument(disableProcessors, Boolean.class), cs.getArgument(sendChunkLightingPacket, Boolean.class), null, cs);
                 return 1;
             })
             .then(Commands.argument(randomSeed, LongArgumentType.longArg())
             .executes(cs -> {
-                generateStructure(Vec3Argument.getCoordinates(cs, locationArg), cs.getArgument(poolArg, ResourceLocation.class), cs.getArgument(depthArg, Integer.class), cs.getArgument(heightmapArg, Boolean.class), cs.getArgument(legacyBoundsArg, Boolean.class), cs.getArgument(disableProcessors, Boolean.class), cs.getArgument(randomSeed, Long.class), cs);
+                generateStructure(Vec3Argument.getCoordinates(cs, locationArg), cs.getArgument(poolArg, ResourceLocation.class), cs.getArgument(depthArg, Integer.class), cs.getArgument(heightmapArg, Boolean.class), cs.getArgument(legacyBoundsArg, Boolean.class), cs.getArgument(disableProcessors, Boolean.class), cs.getArgument(sendChunkLightingPacket, Boolean.class), cs.getArgument(randomSeed, Long.class), cs);
                 return 1;
             })
-        ))))))));
+        )))))))));
 
         dispatcher.register(Commands.literal(commandString).redirect(source));
     }
@@ -97,7 +103,7 @@ public class StructureSpawnCommand {
         return cs.getSource().getLevel().registryAccess().registryOrThrow(Registry.TEMPLATE_POOL_REGISTRY).keySet();
     }
 
-    private static void generateStructure(Coordinates coordinates, ResourceLocation structureStartPoolRL, int depth, boolean heightmapSnap, boolean legacyBoundingBoxRule, boolean disableProcessors, Long randomSeed, CommandContext<CommandSourceStack> cs) {
+    private static void generateStructure(Coordinates coordinates, ResourceLocation structureStartPoolRL, int depth, boolean heightmapSnap, boolean legacyBoundingBoxRule, boolean disableProcessors, boolean sendChunkLightingPacket, Long randomSeed, CommandContext<CommandSourceStack> cs) {
         ServerLevel level = cs.getSource().getLevel();
         BlockPos centerPos = coordinates.getBlockPos(cs.getSource());
         if(heightmapSnap) centerPos = centerPos.below(centerPos.getY()); //not a typo. Needed so heightmap is not offset by player height.
@@ -178,7 +184,9 @@ public class StructureSpawnCommand {
             });
 
             if(!structurePieceList.isEmpty()) {
-                Utilities.refreshChunksOnClients(level);
+                if(sendChunkLightingPacket) {
+                    Utilities.refreshChunksOnClients(level);
+                }
             }
             else {
                 String errorMsg = structureStartPoolRL + " Template Pool spawned no pieces.";

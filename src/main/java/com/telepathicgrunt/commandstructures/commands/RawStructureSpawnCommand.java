@@ -57,6 +57,7 @@ public class RawStructureSpawnCommand {
         String locationArg = "location";
         String cfRL = "configuredstructure";
         String saveStructureBounds = "savestructurebounds";
+        String sendChunkLightingPacket = "sendchunklightingpacket";
         String randomSeed = "randomseed";
 
         LiteralCommandNode<CommandSourceStack> source = dispatcher.register(Commands.literal(commandString)
@@ -65,20 +66,25 @@ public class RawStructureSpawnCommand {
             .then(Commands.argument(cfRL, ResourceLocationArgument.id())
             .suggests((ctx, sb) -> SharedSuggestionProvider.suggestResource(startPoolSuggestions(ctx), sb))
             .executes(cs -> {
-                generateStructure(Vec3Argument.getCoordinates(cs, locationArg), cs.getArgument(cfRL, ResourceLocation.class), true, null, cs);
+                generateStructure(Vec3Argument.getCoordinates(cs, locationArg), cs.getArgument(cfRL, ResourceLocation.class), true, true, null, cs);
                 return 1;
             })
             .then(Commands.argument(saveStructureBounds, BoolArgumentType.bool())
             .executes(cs -> {
-                generateStructure(Vec3Argument.getCoordinates(cs, locationArg), cs.getArgument(cfRL, ResourceLocation.class), cs.getArgument(saveStructureBounds, Boolean.class), null, cs);
+                generateStructure(Vec3Argument.getCoordinates(cs, locationArg), cs.getArgument(cfRL, ResourceLocation.class), cs.getArgument(saveStructureBounds, Boolean.class), true, null, cs);
+                return 1;
+            })
+            .then(Commands.argument(saveStructureBounds, BoolArgumentType.bool())
+            .executes(cs -> {
+                generateStructure(Vec3Argument.getCoordinates(cs, locationArg), cs.getArgument(cfRL, ResourceLocation.class), cs.getArgument(saveStructureBounds, Boolean.class), cs.getArgument(sendChunkLightingPacket, Boolean.class), null, cs);
                 return 1;
             })
             .then(Commands.argument(randomSeed, LongArgumentType.longArg())
             .executes(cs -> {
-                generateStructure(Vec3Argument.getCoordinates(cs, locationArg), cs.getArgument(cfRL, ResourceLocation.class), cs.getArgument(saveStructureBounds, Boolean.class), cs.getArgument(randomSeed, Long.class), cs);
+                generateStructure(Vec3Argument.getCoordinates(cs, locationArg), cs.getArgument(cfRL, ResourceLocation.class), cs.getArgument(saveStructureBounds, Boolean.class), cs.getArgument(sendChunkLightingPacket, Boolean.class), cs.getArgument(randomSeed, Long.class), cs);
                 return 1;
             })
-        )))));
+        ))))));
 
         dispatcher.register(Commands.literal(commandString).redirect(source));
     }
@@ -87,7 +93,7 @@ public class RawStructureSpawnCommand {
         return cs.getSource().getLevel().registryAccess().registryOrThrow(Registry.CONFIGURED_STRUCTURE_FEATURE_REGISTRY).keySet();
     }
 
-    private static void generateStructure(Coordinates coordinates, ResourceLocation structureRL, boolean saveStructureBounds, Long randomSeed, CommandContext<CommandSourceStack> cs) {
+    private static void generateStructure(Coordinates coordinates, ResourceLocation structureRL, boolean saveStructureBounds, boolean sendChunkLightingPacket, Long randomSeed, CommandContext<CommandSourceStack> cs) {
         ServerLevel level = cs.getSource().getLevel();
         BlockPos centerPos = coordinates.getBlockPos(cs.getSource());
         ChunkPos chunkPos = new ChunkPos(centerPos);
@@ -242,7 +248,9 @@ public class RawStructureSpawnCommand {
         }
 
         if(!structureStart.getPieces().isEmpty()) {
-            Utilities.refreshChunksOnClients(level);
+            if(sendChunkLightingPacket) {
+                Utilities.refreshChunksOnClients(level);
+            }
         }
         else {
             String errorMsg = structureRL + " ConfiguredStructure failed to be spawned. (It may have internal checks for valid spots)";

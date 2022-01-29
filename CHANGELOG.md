@@ -1,3 +1,12 @@
+## **(V.1.4.2 Changes) (1.18.1 Minecraft)**
+
+##### Command:
+Added sendchunklightingpacket argument to /spawnconfiguredfeature, /spawnplacedfeature, /spawnrawstructure, and spawnstructure command.
+ If off, it may provide significant performance boost but if the structure or feature places blocks in a very weird way, those blocks 
+ may not show up until the chunk is reloaded. Example, minecraft:forest_rock feature places blocks without sending changes to client.
+ Most features and structures will be fine and sendchunklightingpacket can be set to false.
+
+
 ## **(V.1.4.1 Changes) (1.18.1 Minecraft)**
 
 ##### Command:

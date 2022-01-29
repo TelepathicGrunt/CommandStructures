@@ -1,6 +1,7 @@
 package com.telepathicgrunt.commandstructures.commands;
 
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import com.telepathicgrunt.commandstructures.CommandStructuresMain;
@@ -26,6 +27,7 @@ public class ConfiguredFeatureSpawnCommand {
         String commandString = "spawnfeature";
         String locationArg = "location";
         String rlArg = "configuredfeatureresourcelocation";
+        String sendChunkLightingPacket = "sendchunklightingpacket";
 
         LiteralCommandNode<CommandSourceStack> source = dispatcher.register(Commands.literal(commandString)
             .requires((permission) -> permission.hasPermission(2))
@@ -33,9 +35,15 @@ public class ConfiguredFeatureSpawnCommand {
             .then(Commands.argument(rlArg, ResourceLocationArgument.id())
             .suggests((ctx, sb) -> SharedSuggestionProvider.suggestResource(configuredFeatureSuggestions(ctx), sb))
             .executes(cs -> {
-                generateStructure(Vec3Argument.getCoordinates(cs, locationArg), cs.getArgument(rlArg, ResourceLocation.class), cs);
+                generateStructure(Vec3Argument.getCoordinates(cs, locationArg), cs.getArgument(rlArg, ResourceLocation.class), true, cs);
                 return 1;
-            }))));
+            })
+            .then(Commands.argument(sendChunkLightingPacket, BoolArgumentType.bool())
+            .executes(cs -> {
+                generateStructure(Vec3Argument.getCoordinates(cs, locationArg), cs.getArgument(rlArg, ResourceLocation.class), cs.getArgument(sendChunkLightingPacket, Boolean.class), cs);
+                return 1;
+            })
+        ))));
 
         dispatcher.register(Commands.literal(commandString).redirect(source));
     }
@@ -44,7 +52,7 @@ public class ConfiguredFeatureSpawnCommand {
         return cs.getSource().getLevel().registryAccess().registryOrThrow(Registry.CONFIGURED_FEATURE_REGISTRY).keySet();
     }
 
-    private static void generateStructure(Coordinates coordinates, ResourceLocation configuredFeatureRL, CommandContext<CommandSourceStack> cs) {
+    private static void generateStructure(Coordinates coordinates, ResourceLocation configuredFeatureRL, boolean sendChunkLightingPacket, CommandContext<CommandSourceStack> cs) {
         ServerLevel level = cs.getSource().getLevel();
         BlockPos centerPos = coordinates.getBlockPos(cs.getSource());
         ConfiguredFeature<?, ?> cf = cs.getSource().registryAccess().registryOrThrow(Registry.CONFIGURED_FEATURE_REGISTRY).get(configuredFeatureRL);
@@ -63,6 +71,8 @@ public class ConfiguredFeatureSpawnCommand {
             throw new CommandRuntimeException(new TextComponent(errorMsg));
         }
 
-        Utilities.refreshChunksOnClients(level);
+        if(sendChunkLightingPacket) {
+            Utilities.refreshChunksOnClients(level);
+        }
     }
 }
