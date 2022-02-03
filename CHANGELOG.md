@@ -1,3 +1,9 @@
+## **(V.1.4.3 Changes) (1.18.1 Minecraft)**
+
+##### Command:
+Fixed autocomplete dying for /spawnpieces command if there's a nbt file not inside a folder within the /structures/ folder.
+
+
 ## **(V.1.4.2 Changes) (1.18.1 Minecraft)**
 
 ##### Command:

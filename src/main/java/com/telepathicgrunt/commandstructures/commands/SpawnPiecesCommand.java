@@ -116,7 +116,9 @@ public class SpawnPiecesCommand {
 
                     // We want to suggest folders instead of individual nbts
                     int i = path.lastIndexOf('/');
-                    path = path.substring(0, i) + "/";
+                    if(i > 0) {
+                        path = path.substring(0, i) + "/";
+                    }
 
                     return new ResourceLocation(namespace, path);
                 })
