@@ -125,7 +125,7 @@ public class StructureSpawnCommand {
         PieceGeneratorSupplier.Context<JigsawConfiguration> newContext = new PieceGeneratorSupplier.Context<>(
                 level.getChunkSource().getGenerator(),
                 level.getChunkSource().getGenerator().getBiomeSource(),
-                level.getSeed(),
+                randomSeed == null ? level.getSeed() : randomSeed,
                 randomSeed == null ? new ChunkPos(centerPos) : new ChunkPos(0, 0),
                 newConfig,
                 level,

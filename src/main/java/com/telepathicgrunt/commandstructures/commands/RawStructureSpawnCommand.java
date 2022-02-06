@@ -105,7 +105,8 @@ public class RawStructureSpawnCommand {
             worldgenrandom = new WorldgenRandom(new XoroshiroRandomSource(RandomSupport.seedUniquifier()));
             long i = worldgenrandom.setDecorationSeed(level.getSeed(), centerPos.getX(), centerPos.getZ());
             worldgenrandom.setFeatureSeed(i, 0, 0);
-        } else {
+        }
+        else {
             worldgenrandom = new WorldgenRandom(new LegacyRandomSource(randomSeed));
         }
 
@@ -154,7 +155,7 @@ public class RawStructureSpawnCommand {
             PieceGeneratorSupplier.Context<JigsawConfiguration> newContext = new PieceGeneratorSupplier.Context<>(
                     level.getChunkSource().getGenerator(),
                     level.getChunkSource().getGenerator().getBiomeSource(),
-                    level.getSeed(),
+                    randomSeed == null ? level.getSeed() : randomSeed,
                     randomSeed == null ? new ChunkPos(centerPos) : new ChunkPos(0, 0),
                     (JigsawConfiguration) configuredStructureFeature.config,
                     level,

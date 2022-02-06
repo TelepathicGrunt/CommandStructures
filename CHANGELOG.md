@@ -1,3 +1,9 @@
+## **(V.1.4.4 Changes) (1.18.1 Minecraft)**
+
+##### Command:
+Fixed /spawnstructure and /spawnrawstructure not keeping passed in randomseed's effect consistent across world saves.
+
+
 ## **(V.1.4.3 Changes) (1.18.1 Minecraft)**
 
 ##### Command:
