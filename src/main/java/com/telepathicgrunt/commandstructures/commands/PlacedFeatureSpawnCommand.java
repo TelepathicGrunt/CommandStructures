@@ -71,8 +71,8 @@ public class PlacedFeatureSpawnCommand {
         BlockPos worldBottomPos = new BlockPos(centerPos.getX(), level.dimensionType().minY(), centerPos.getZ());
 
         PlacedFeature noBiomeCheckPlacedFeature = new PlacedFeature(
-                placedFeature.feature,
-                placedFeature.getPlacement().stream()
+                placedFeature.feature(),
+                placedFeature.placement().stream()
                         .filter(placementModifier -> placementModifier.type() != biomePlacement)
                         .collect(Collectors.toList()));
 

@@ -35,8 +35,6 @@ import net.minecraft.world.level.levelgen.feature.StructureFeature;
 import net.minecraft.world.level.levelgen.feature.configurations.JigsawConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.MineshaftConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
-import net.minecraft.world.level.levelgen.feature.configurations.StructureFeatureConfiguration;
-import net.minecraft.world.level.levelgen.feature.structures.JigsawPlacement;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.BuriedTreasurePieces;
 import net.minecraft.world.level.levelgen.structure.NetherFossilPieces;
@@ -46,6 +44,7 @@ import net.minecraft.world.level.levelgen.structure.StructureStart;
 import net.minecraft.world.level.levelgen.structure.pieces.PieceGenerator;
 import net.minecraft.world.level.levelgen.structure.pieces.PieceGeneratorSupplier;
 import net.minecraft.world.level.levelgen.structure.pieces.StructurePiecesBuilder;
+import net.minecraft.world.level.levelgen.structure.pools.JigsawPlacement;
 
 import java.util.Optional;
 import java.util.Set;
@@ -118,7 +117,7 @@ public class RawStructureSpawnCommand {
             throw new CommandRuntimeException(new TextComponent(errorMsg));
         }
 
-        StructureStart<?> structureStart;
+        StructureStart structureStart;
 
         if (configuredStructureFeature.feature == StructureFeature.MINESHAFT) {
             StructurePiecesBuilder structurePiecesBuilder = new StructurePiecesBuilder();
@@ -133,7 +132,7 @@ public class RawStructureSpawnCommand {
                             worldgenrandom,
                             0)
             );
-            structureStart = new StructureStart<>(configuredStructureFeature.feature, chunkPos, 0, structurePiecesBuilder.build());
+            structureStart = new StructureStart(configuredStructureFeature, chunkPos, 0, structurePiecesBuilder.build());
         }
         else if (configuredStructureFeature.feature == StructureFeature.OCEAN_MONUMENT) {
             StructurePiecesBuilder structurePiecesBuilder = new StructurePiecesBuilder();
@@ -148,7 +147,7 @@ public class RawStructureSpawnCommand {
                             worldgenrandom,
                             0)
             );
-            structureStart = new StructureStart<>(configuredStructureFeature.feature, chunkPos, 0, structurePiecesBuilder.build());
+            structureStart = new StructureStart(configuredStructureFeature, chunkPos, 0, structurePiecesBuilder.build());
         }
         else if (configuredStructureFeature.feature == StructureFeature.PILLAGER_OUTPOST) {
             StructurePiecesBuilder structurePiecesBuilder = new StructurePiecesBuilder();
@@ -180,9 +179,9 @@ public class RawStructureSpawnCommand {
                             worldgenrandom,
                             0)
             ));
-            structureStart = new StructureStart<>(configuredStructureFeature.feature, chunkPos, 0, structurePiecesBuilder.build());
+            structureStart = new StructureStart(configuredStructureFeature, chunkPos, 0, structurePiecesBuilder.build());
         }
-        else if(configuredStructureFeature.feature == StructureFeature.NETHER_BRIDGE) {
+        else if(configuredStructureFeature.feature == StructureFeature.FORTRESS) {
             StructurePiecesBuilder structurePiecesBuilder = new StructurePiecesBuilder();
             NetherFortressFeature.generatePieces(
                     structurePiecesBuilder,
@@ -195,17 +194,17 @@ public class RawStructureSpawnCommand {
                             worldgenrandom,
                             0)
             );
-            structureStart = new StructureStart<>(configuredStructureFeature.feature, chunkPos, 0, structurePiecesBuilder.build());
+            structureStart = new StructureStart(configuredStructureFeature, chunkPos, 0, structurePiecesBuilder.build());
         }
         else if(configuredStructureFeature.feature == StructureFeature.NETHER_FOSSIL) {
             StructurePiecesBuilder structurePiecesBuilder = new StructurePiecesBuilder();
             NetherFossilPieces.addPieces(level.getStructureManager(), structurePiecesBuilder, worldgenrandom, centerPos);
-            structureStart = new StructureStart<>(configuredStructureFeature.feature, chunkPos, 0, structurePiecesBuilder.build());
+            structureStart = new StructureStart(configuredStructureFeature, chunkPos, 0, structurePiecesBuilder.build());
         }
         else if(configuredStructureFeature.feature == StructureFeature.BURIED_TREASURE) {
             StructurePiecesBuilder structurePiecesBuilder = new StructurePiecesBuilder();
             structurePiecesBuilder.addPiece(new BuriedTreasurePieces.BuriedTreasurePiece(centerPos));
-            structureStart = new StructureStart<>(configuredStructureFeature.feature, chunkPos, 0, structurePiecesBuilder.build());
+            structureStart = new StructureStart(configuredStructureFeature, chunkPos, 0, structurePiecesBuilder.build());
         }
         else if(configuredStructureFeature.feature == StructureFeature.STRONGHOLD) {
             StructurePiecesBuilder structurePiecesBuilder = new StructurePiecesBuilder();
@@ -220,7 +219,7 @@ public class RawStructureSpawnCommand {
                             worldgenrandom,
                             0)
             );
-            structureStart = new StructureStart<>(configuredStructureFeature.feature, chunkPos, 0, structurePiecesBuilder.build());
+            structureStart = new StructureStart(configuredStructureFeature, chunkPos, 0, structurePiecesBuilder.build());
         }
         else {
             structureStart = configuredStructureFeature.generate(
@@ -231,14 +230,13 @@ public class RawStructureSpawnCommand {
                     randomSeed == null ? RandomSupport.seedUniquifier() : randomSeed,
                     chunkPos,
                     0,
-                    new StructureFeatureConfiguration(1, 0, 0),
                     level,
                     (biome) -> true
             );
         }
 
         structureStart.getPieces().forEach(piece -> generatePiece(level, worldgenrandom, centerPos, piece));
-        level.structureFeatureManager().setStartForFeature(sectionpos, configuredStructureFeature.feature, structureStart, chunkAccess);
+        level.structureFeatureManager().setStartForFeature(sectionpos, configuredStructureFeature, structureStart, chunkAccess);
 
         if(saveStructureBounds) {
             Set<ChunkPos> chunkPosSet = structureStart.getPieces().stream().map(piece -> new ChunkPos(piece.getBoundingBox().getCenter())).collect(Collectors.toSet());

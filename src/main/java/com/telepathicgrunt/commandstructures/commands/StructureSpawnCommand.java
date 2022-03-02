@@ -16,6 +16,7 @@ import net.minecraft.commands.arguments.ResourceLocationArgument;
 import net.minecraft.commands.arguments.coordinates.Coordinates;
 import net.minecraft.commands.arguments.coordinates.Vec3Argument;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.data.worldgen.ProcessorLists;
 import net.minecraft.network.chat.TextComponent;
@@ -27,21 +28,20 @@ import net.minecraft.world.level.levelgen.RandomSupport;
 import net.minecraft.world.level.levelgen.WorldgenRandom;
 import net.minecraft.world.level.levelgen.XoroshiroRandomSource;
 import net.minecraft.world.level.levelgen.feature.configurations.JigsawConfiguration;
-import net.minecraft.world.level.levelgen.feature.structures.JigsawPlacement;
-import net.minecraft.world.level.levelgen.feature.structures.SinglePoolElement;
-import net.minecraft.world.level.levelgen.feature.structures.StructureTemplatePool;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.PoolElementStructurePiece;
 import net.minecraft.world.level.levelgen.structure.StructurePiece;
 import net.minecraft.world.level.levelgen.structure.pieces.PieceGenerator;
 import net.minecraft.world.level.levelgen.structure.pieces.PieceGeneratorSupplier;
 import net.minecraft.world.level.levelgen.structure.pieces.StructurePiecesBuilder;
+import net.minecraft.world.level.levelgen.structure.pools.JigsawPlacement;
+import net.minecraft.world.level.levelgen.structure.pools.SinglePoolElement;
+import net.minecraft.world.level.levelgen.structure.pools.StructureTemplatePool;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureProcessorList;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Supplier;
 
 public class StructureSpawnCommand {
     public static void dataGenCommand(CommandDispatcher<CommandSourceStack> dispatcher) {
@@ -117,7 +117,7 @@ public class StructureSpawnCommand {
         }
 
         JigsawConfiguration newConfig = new JigsawConfiguration(
-                () -> templatePool,
+                Holder.direct(templatePool),
                 depth
         );
 
@@ -171,8 +171,8 @@ public class StructureSpawnCommand {
                 if(disableProcessors) {
                     if(piece instanceof PoolElementStructurePiece poolElementStructurePiece) {
                         if(poolElementStructurePiece.getElement() instanceof SinglePoolElement singlePoolElement) {
-                            Supplier<StructureProcessorList> oldProcessorList = singlePoolElement.processors;
-                            singlePoolElement.processors = () -> ProcessorLists.EMPTY;
+                            Holder<StructureProcessorList> oldProcessorList = singlePoolElement.processors;
+                            singlePoolElement.processors = ProcessorLists.EMPTY;
                             generatePiece(level, newContext, worldgenrandom, finalCenterPos, piece);
                             singlePoolElement.processors = oldProcessorList; // Set the processors back or else our change is permanent.
                         }
