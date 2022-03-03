@@ -1,3 +1,9 @@
+## **(V.2.0.0 Changes) (1.18.2 Minecraft)**
+
+##### Major:
+Updated to 1.18.2
+
+
 ## **(V.1.4.4 Changes) (1.18.1 Minecraft)**
 
 ##### Command:
