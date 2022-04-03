@@ -73,7 +73,7 @@ public class RawStructureSpawnCommand {
                 generateStructure(Vec3Argument.getCoordinates(cs, locationArg), cs.getArgument(cfRL, ResourceLocation.class), cs.getArgument(saveStructureBounds, Boolean.class), true, null, cs);
                 return 1;
             })
-            .then(Commands.argument(saveStructureBounds, BoolArgumentType.bool())
+            .then(Commands.argument(sendChunkLightingPacket, BoolArgumentType.bool())
             .executes(cs -> {
                 generateStructure(Vec3Argument.getCoordinates(cs, locationArg), cs.getArgument(cfRL, ResourceLocation.class), cs.getArgument(saveStructureBounds, Boolean.class), cs.getArgument(sendChunkLightingPacket, Boolean.class), null, cs);
                 return 1;

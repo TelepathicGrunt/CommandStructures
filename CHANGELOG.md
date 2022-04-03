@@ -1,3 +1,9 @@
+## **(V.2.0.1 Changes) (1.18.2 Minecraft)**
+
+##### Command:
+Fixed /spawnrawstructure command's sendchunklightingpacket and randomseed argument not working.
+
+
 ## **(V.2.0.0 Changes) (1.18.2 Minecraft)**
 
 ##### Major:
