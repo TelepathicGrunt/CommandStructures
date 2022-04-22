@@ -1,9 +1,3 @@
-## **(V.2.0.2 Changes) (1.18.2 Minecraft)**
-
-##### Misc:
-Ported to Quilt modloader
-
-
 ## **(V.2.0.1 Changes) (1.18.2 Minecraft)**
 
 ##### Command:

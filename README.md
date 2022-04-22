@@ -24,7 +24,7 @@ Don't forget to change \<modversion> with the actual latest version of this mod 
 &nbsp; ...
 
 
-&nbsp; modRuntimeOnly fg.deobf("com.telepathicgrunt:CommandStructures-Quilt:\<modversion>+1.18.1")
+&nbsp; modRuntimeOnly fg.deobf("com.telepathicgrunt:CommandStructures-Fabric:\<modversion>+1.18.1")
 
 
 }</blockquote>

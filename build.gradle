@@ -1,3 +1,5 @@
+import net.fabricmc.loom.task.RemapJarTask
+
 buildscript {
 	repositories {
 		maven { url "https://plugins.gradle.org/m2/" }
@@ -7,50 +9,47 @@ buildscript {
 	}
 }
 plugins {
-	alias(libs.plugins.quilt.loom)
 	id "net.darkhax.curseforgegradle" version "1.0.7"
+	id 'fabric-loom' version '0.10-SNAPSHOT'
+	id 'io.github.juuxel.loom-quiltflower-mini' version '1.1.0'
 	id 'maven-publish'
 }
 
-version = "${project.mod_version}+${libs.versions.minecraft.get()}"
-archivesBaseName = "${project.modid}_quilt"
+sourceCompatibility = JavaVersion.VERSION_17
+targetCompatibility = JavaVersion.VERSION_17
+
+version = "${project.mod_version}+${project.minecraft_version}"
+archivesBaseName = "${project.modid}_fabric"
 group = project.maven_group
 
 repositories {}
-
 dependencies {
-	minecraft libs.minecraft
-	mappings( loom.layered {
-		addLayer quiltMappings.mappings("org.quiltmc:quilt-mappings:${libs.versions.quilt.mappings.get()}:v2")
-		officialMojangMappings()
-	})
-	modImplementation libs.quilt.loader
-	modImplementation libs.quilted.fabric.api
+	minecraft "com.mojang:minecraft:${project.minecraft_version}"
+	mappings minecraft.officialMojangMappings()
+	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
+
+	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 }
 
 processResources {
 	inputs.property "version", project.version
 
-	filesMatching("quilt.mod.json") {
+	filesMatching("fabric.mod.json") {
 		expand "version": project.version
 	}
 }
 
 tasks.withType(JavaCompile).configureEach {
-	it.options.encoding = 'UTF-8'
-	it.options.release.set(17)
+	it.options.encoding = "UTF-8"
+	it.options.release = 17
 }
 
 java {
-	sourceCompatibility = JavaVersion.VERSION_17
-	targetCompatibility = JavaVersion.VERSION_17
 	withSourcesJar()
 }
 
 jar {
-	from("LICENSE") {
-		rename { "${it}_${archivesBaseName}"}
-	}
+	from "LICENSE.txt"
 }
 
 apply from: 'gradle/maven.gradle'
@@ -61,13 +60,10 @@ task publishCurseForge(type: net.darkhax.curseforgegradle.TaskPublishCurseForge)
 	String changelogText = new File("CHANGELOG.md").getText('UTF-8')
 
 	def mainFile = upload(projectId, remapJar)
-	disableVersionDetection()
-	mainFile.addGameVersion("1.18.2")
-
 	mainFile.changelog = changelogText
 	mainFile.changelogType = "markdown"
-	mainFile.releaseType = "alpha"
-	mainFile.displayName = "CommandStructures-Quilt v${project.mod_version} (${libs.versions.minecraft.get()} MC)"
+	mainFile.releaseType = "release"
+	mainFile.displayName = "CommandStructures-Fabric v${project.mod_version} (${project.minecraft_version} MC)"
 }
 
 task buildAndRelease {}

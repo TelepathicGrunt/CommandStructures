@@ -5,11 +5,10 @@ import com.telepathicgrunt.commandstructures.commands.PlacedFeatureSpawnCommand;
 import com.telepathicgrunt.commandstructures.commands.RawStructureSpawnCommand;
 import com.telepathicgrunt.commandstructures.commands.SpawnPiecesCommand;
 import com.telepathicgrunt.commandstructures.commands.StructureSpawnCommand;
+import net.fabricmc.api.ModInitializer;
+import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.quiltmc.loader.api.ModContainer;
-import org.quiltmc.qsl.base.api.entrypoint.ModInitializer;
-import org.quiltmc.qsl.command.api.CommandRegistrationCallback;
 
 public class CommandStructuresMain implements ModInitializer {
 
@@ -17,12 +16,12 @@ public class CommandStructuresMain implements ModInitializer {
     public static final String MODID = "command_structures";
 
     @Override
-    public void onInitialize(ModContainer mod) {
-        CommandRegistrationCallback.EVENT.register((dispatcher, integrated, dedicated) -> StructureSpawnCommand.dataGenCommand(dispatcher));
-        CommandRegistrationCallback.EVENT.register((dispatcher, integrated, dedicated) -> SpawnPiecesCommand.dataGenCommand(dispatcher));
-        CommandRegistrationCallback.EVENT.register((dispatcher, integrated, dedicated) -> ConfiguredFeatureSpawnCommand.dataGenCommand(dispatcher));
-        CommandRegistrationCallback.EVENT.register((dispatcher, integrated, dedicated) -> PlacedFeatureSpawnCommand.dataGenCommand(dispatcher));
-        CommandRegistrationCallback.EVENT.register((dispatcher, integrated, dedicated) -> RawStructureSpawnCommand.dataGenCommand(dispatcher));
+    public void onInitialize() {
+        CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> StructureSpawnCommand.dataGenCommand(dispatcher));
+        CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> SpawnPiecesCommand.dataGenCommand(dispatcher));
+        CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> ConfiguredFeatureSpawnCommand.dataGenCommand(dispatcher));
+        CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> PlacedFeatureSpawnCommand.dataGenCommand(dispatcher));
+        CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> RawStructureSpawnCommand.dataGenCommand(dispatcher));
 
         // Silences logspam due to some mc implementations with spawning structures rawly like Mineshafts
         Logger rootLogger = LogManager.getRootLogger();

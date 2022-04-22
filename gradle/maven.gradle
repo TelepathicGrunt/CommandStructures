@@ -16,20 +16,20 @@ publishing {
             }
 
             pom {
-                name = 'CommandStructures-Quilt'
+                name = 'CommandStructures-Fabric'
                 description = 'spawn structures by command'
-                url = 'https://github.com/TelepathicGrunt/CommandStructures-Quilt'
+                url = 'https://github.com/TelepathicGrunt/CommandStructures-Fabric'
 
                 scm {
-                    connection = 'git:https://github.com/TelepathicGrunt/CommandStructures-Quilt.git'
-                    developerConnection = 'git:https://github.com/TelepathicGrunt/CommandStructures-Quilt.git'
-                    url = 'https://github.com/TelepathicGrunt/CommandStructures-Quilt'
+                    connection = 'git:https://github.com/TelepathicGrunt/CommandStructures-Fabric.git'
+                    developerConnection = 'git:https://github.com/TelepathicGrunt/CommandStructures-Fabric.git'
+                    url = 'https://github.com/TelepathicGrunt/CommandStructures-Fabric'
                 }
 
                 licenses {
                     license {
-                        name = 'MIT'
-                        url = 'https://github.com/TelepathicGrunt/CommandStructures-Quilt/LICENSE.txt'
+                        name = 'GNU Lesser General Public License v3.0'
+                        url = 'https://github.com/TelepathicGrunt/CommandStructures-Fabric/LICENSE.txt'
                     }
                 }
 

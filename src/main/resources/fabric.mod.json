@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "id": "command_structures",
+  "version": "${version}",
+
+  "name": "Command Structures",
+  "description": "Spawn structures by command",
+  "authors": [
+    "TelepathicGrunt"
+  ],
+  "contact": {
+    "homepage": "https://github.com/TelepathicGrunt/CommandStructures-Forge"
+  },
+
+  "license": "MIT License",
+  "icon": "assets/commandstructures.png",
+
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "com.telepathicgrunt.commandstructures.CommandStructuresMain"
+    ]
+  },
+  "mixins": [
+    "command_structures.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.12.0",
+    "minecraft": ">=1.18.2",
+    "fabric": ">=0.43.1"
+  }
+}

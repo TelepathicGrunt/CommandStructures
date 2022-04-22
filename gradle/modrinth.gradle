@@ -16,12 +16,12 @@ String fileContents = new File("./", "CHANGELOG.md").text
 // Make sure it runs after build!
 task publishModrinth (type: TaskModrinthUpload) {
     token = "$System.env.MODRINTH"
-    versionName = "CommandStructures-Quilt"
+    versionName = "CommandStructures-Fabric"
     projectId = 'WEfvvlnl'
-    versionNumber = project.version + "+quilt"
+    versionNumber = project.version + "+fabric"
     uploadFile = remapJar
     changelog = fileContents
     addGameVersion("1.18.2")
-    addLoader('quilt')
+    addLoader('fabric')
 }
 
