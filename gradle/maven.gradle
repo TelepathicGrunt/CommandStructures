@@ -1,25 +1,35 @@
-jar.finalizedBy('reobfJar')
+apply plugin: 'maven-publish'
+
+task apiJar(type: Jar, dependsOn: classes) {
+    from(sourceSets.main.output)
+    include 'command_structures/**'
+}
 
 publishing {
     publications {
         mavenJava(MavenPublication) {
-            artifact jar
+            artifact(remapJar) {
+                builtBy remapJar
+            }
+            artifact(sourcesJar) {
+                builtBy remapSourcesJar
+            }
 
             pom {
-                name = 'CommandStructures-Forge'
+                name = 'CommandStructures-Quilt'
                 description = 'spawn structures by command'
-                url = 'https://github.com/TelepathicGrunt/CommandStructures-Forge'
+                url = 'https://github.com/TelepathicGrunt/CommandStructures-Quilt'
 
                 scm {
-                    connection = 'git:https://github.com/TelepathicGrunt/CommandStructures-Forge.git'
-                    developerConnection = 'git:https://github.com/TelepathicGrunt/CommandStructures-Forge.git'
-                    url = 'https://github.com/TelepathicGrunt/CommandStructures-Forge'
+                    connection = 'git:https://github.com/TelepathicGrunt/CommandStructures-Quilt.git'
+                    developerConnection = 'git:https://github.com/TelepathicGrunt/CommandStructures-Quilt.git'
+                    url = 'https://github.com/TelepathicGrunt/CommandStructures-Quilt'
                 }
 
                 licenses {
                     license {
                         name = 'MIT'
-                        url = 'https://github.com/TelepathicGrunt/CommandStructures-Forge/LICENSE.txt'
+                        url = 'https://github.com/TelepathicGrunt/CommandStructures-Quilt/LICENSE.txt'
                     }
                 }
 
@@ -31,6 +41,7 @@ publishing {
                     }
                 }
             }
+
         }
     }
 

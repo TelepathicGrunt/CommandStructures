@@ -16,7 +16,7 @@ For developers that want to add this mod to their mod's workspace:
 
 &nbsp;
 
-Don't forget to change \<modversion> with the actual latest version of this mod like `1.2.1` for example.
+Don't forget to change \<modversion> with the actual latest version of this mod like `1.2.0` for example.
 
 <blockquote>dependencies {
 
@@ -24,7 +24,7 @@ Don't forget to change \<modversion> with the actual latest version of this mod 
 &nbsp; ...
 
 
-&nbsp; runtimeOnly fg.deobf("com.telepathicgrunt:CommandStructures:\<modversion>+1.18.1")
+&nbsp; modRuntimeOnly fg.deobf("com.telepathicgrunt:CommandStructures-Quilt:\<modversion>+1.18.1")
 
 
 }</blockquote>

@@ -7,6 +7,10 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import com.telepathicgrunt.commandstructures.CommandStructuresMain;
 import com.telepathicgrunt.commandstructures.Utilities;
+import com.telepathicgrunt.commandstructures.mixin.MineshaftFeatureAccessor;
+import com.telepathicgrunt.commandstructures.mixin.NetherFortressFeatureAccessor;
+import com.telepathicgrunt.commandstructures.mixin.OceanMonumentFeatureAccessor;
+import com.telepathicgrunt.commandstructures.mixin.StrongholdFeatureAccessor;
 import net.minecraft.commands.CommandRuntimeException;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -27,10 +31,6 @@ import net.minecraft.world.level.levelgen.RandomSupport;
 import net.minecraft.world.level.levelgen.WorldgenRandom;
 import net.minecraft.world.level.levelgen.XoroshiroRandomSource;
 import net.minecraft.world.level.levelgen.feature.ConfiguredStructureFeature;
-import net.minecraft.world.level.levelgen.feature.MineshaftFeature;
-import net.minecraft.world.level.levelgen.feature.NetherFortressFeature;
-import net.minecraft.world.level.levelgen.feature.OceanMonumentFeature;
-import net.minecraft.world.level.levelgen.feature.StrongholdFeature;
 import net.minecraft.world.level.levelgen.feature.StructureFeature;
 import net.minecraft.world.level.levelgen.feature.configurations.JigsawConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.MineshaftConfiguration;
@@ -104,8 +104,7 @@ public class RawStructureSpawnCommand {
             worldgenrandom = new WorldgenRandom(new XoroshiroRandomSource(RandomSupport.seedUniquifier()));
             long i = worldgenrandom.setDecorationSeed(level.getSeed(), centerPos.getX(), centerPos.getZ());
             worldgenrandom.setFeatureSeed(i, 0, 0);
-        }
-        else {
+        } else {
             worldgenrandom = new WorldgenRandom(new LegacyRandomSource(randomSeed));
         }
 
@@ -121,7 +120,7 @@ public class RawStructureSpawnCommand {
 
         if (configuredStructureFeature.feature == StructureFeature.MINESHAFT) {
             StructurePiecesBuilder structurePiecesBuilder = new StructurePiecesBuilder();
-            MineshaftFeature.generatePieces(
+            MineshaftFeatureAccessor.callGeneratePieces(
                     structurePiecesBuilder,
                     new PieceGenerator.Context<>(
                             (MineshaftConfiguration) configuredStructureFeature.config,
@@ -136,7 +135,7 @@ public class RawStructureSpawnCommand {
         }
         else if (configuredStructureFeature.feature == StructureFeature.OCEAN_MONUMENT) {
             StructurePiecesBuilder structurePiecesBuilder = new StructurePiecesBuilder();
-            OceanMonumentFeature.generatePieces(
+            OceanMonumentFeatureAccessor.callGeneratePieces(
                     structurePiecesBuilder,
                     new PieceGenerator.Context<>(
                             (NoneFeatureConfiguration) configuredStructureFeature.config,
@@ -183,7 +182,7 @@ public class RawStructureSpawnCommand {
         }
         else if(configuredStructureFeature.feature == StructureFeature.FORTRESS) {
             StructurePiecesBuilder structurePiecesBuilder = new StructurePiecesBuilder();
-            NetherFortressFeature.generatePieces(
+            NetherFortressFeatureAccessor.callGeneratePieces(
                     structurePiecesBuilder,
                     new PieceGenerator.Context<>(
                             (NoneFeatureConfiguration) configuredStructureFeature.config,
@@ -208,7 +207,7 @@ public class RawStructureSpawnCommand {
         }
         else if(configuredStructureFeature.feature == StructureFeature.STRONGHOLD) {
             StructurePiecesBuilder structurePiecesBuilder = new StructurePiecesBuilder();
-            StrongholdFeature.generatePieces(
+            StrongholdFeatureAccessor.callGeneratePieces(
                     structurePiecesBuilder,
                     new PieceGenerator.Context<>(
                             (NoneFeatureConfiguration) configuredStructureFeature.config,

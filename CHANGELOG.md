@@ -1,3 +1,9 @@
+## **(V.2.0.2 Changes) (1.18.2 Minecraft)**
+
+##### Misc:
+Ported to Quilt modloader
+
+
 ## **(V.2.0.1 Changes) (1.18.2 Minecraft)**
 
 ##### Command:
@@ -26,9 +32,9 @@ Fixed autocomplete dying for /spawnpieces command if there's a nbt file not insi
 
 ##### Command:
 Added sendchunklightingpacket argument to /spawnconfiguredfeature, /spawnplacedfeature, /spawnrawstructure, and spawnstructure command.
- If off, it may provide significant performance boost but if the structure or feature places blocks in a very weird way, those blocks 
- may not show up until the chunk is reloaded. Example, minecraft:forest_rock feature places blocks without sending changes to client.
- Most features and structures will be fine and sendchunklightingpacket can be set to false.
+  If off, it may provide significant performance boost but if the structure or feature places blocks in a very weird way, those blocks
+  may not show up until the chunk is reloaded. Example, minecraft:forest_rock feature places blocks without sending changes to client.
+  Most features and structures will be fine and sendchunklightingpacket can be set to false.
 
 
 ## **(V.1.4.1 Changes) (1.18.1 Minecraft)**
@@ -53,19 +59,13 @@ Added location argument to /spawnstructure command.
 Created /spawnfeature and /spawnplacedfeature commands.
 
 
-## **(V.1.2.2 Changes) (1.18.1 Minecraft)**
+## **(V.1.2.1 Changes) (1.18.1 Minecraft)**
 
 ##### Command:
 Cached the suggestions for /spawnpieces command. Much less waiting after initial load of suggested folders to generate pieces from.
 
 
-### **(V.1.2.1 Changes) (1.18.1 Minecraft)**
-
-##### Misc:
-Fixed issue where mod cannot load in prod due to it checking for mixins config file that doesn't exist.
-
-
-### **(V.1.2.0 Changes) (1.18.1 Minecraft)**
+## **(V.1.2.0 Changes) (1.18.1 Minecraft)**
 
 ##### Command:
 Optimized /spawnpieces arg more and will always place structure void where the structure piece had structure void.
@@ -78,7 +78,7 @@ Optimized /spawnpieces arg more and will always place structure void where the s
 ##### Command:
 Added argument to allow disabling processors when generating structures.
 
-Added /spawnpieces command that was helped with by Patrigan! 
+Added /spawnpieces command that was helped with by Patrigan!
 
 
 ### **(V.1.0.1 Changes) (1.18.1 Minecraft)**

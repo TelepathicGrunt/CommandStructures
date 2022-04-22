@@ -11,7 +11,7 @@ import org.apache.logging.log4j.message.Message;
 public class LogSpamFiltering extends AbstractFilter {
 
     @Override
-    public Filter.Result filter(LogEvent event) {
+    public Result filter(LogEvent event) {
         Message message = event.getMessage();
         if (message != null) {
             if(message.getFormattedMessage().contains("Trying to mark a block for PostProcessing @")) {

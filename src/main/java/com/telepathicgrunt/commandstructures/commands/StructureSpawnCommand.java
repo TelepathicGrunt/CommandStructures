@@ -8,6 +8,7 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import com.telepathicgrunt.commandstructures.CommandStructuresMain;
 import com.telepathicgrunt.commandstructures.Utilities;
+import com.telepathicgrunt.commandstructures.mixin.SinglePoolElementAccessor;
 import net.minecraft.commands.CommandRuntimeException;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -171,10 +172,10 @@ public class StructureSpawnCommand {
                 if(disableProcessors) {
                     if(piece instanceof PoolElementStructurePiece poolElementStructurePiece) {
                         if(poolElementStructurePiece.getElement() instanceof SinglePoolElement singlePoolElement) {
-                            Holder<StructureProcessorList> oldProcessorList = singlePoolElement.processors;
-                            singlePoolElement.processors = ProcessorLists.EMPTY;
+                            Holder<StructureProcessorList> oldProcessorList = ((SinglePoolElementAccessor)singlePoolElement).getProcessors();
+                            ((SinglePoolElementAccessor)singlePoolElement).setProcessors(ProcessorLists.EMPTY);
                             generatePiece(level, newContext, worldgenrandom, finalCenterPos, piece);
-                            singlePoolElement.processors = oldProcessorList; // Set the processors back or else our change is permanent.
+                            ((SinglePoolElementAccessor)singlePoolElement).setProcessors(oldProcessorList); // Set the processors back or else our change is permanent.
                         }
                     }
                 }

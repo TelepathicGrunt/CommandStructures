@@ -1,85 +1,78 @@
 buildscript {
-    repositories {
-        maven { url = 'https://maven.minecraftforge.net' }
-        mavenCentral()
-        maven { url "https://plugins.gradle.org/m2/" }
-    }
-    dependencies {
-        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '5.1.+', changing: true
-        classpath group: 'gradle.plugin.com.modrinth.minotaur', name: 'Minotaur', version: '1.2.1'
-    }
+	repositories {
+		maven { url "https://plugins.gradle.org/m2/" }
+	}
+	dependencies {
+		classpath group: 'gradle.plugin.com.modrinth.minotaur', name: 'Minotaur', version: '1.2.1'
+	}
 }
-
 plugins {
-    id "net.darkhax.curseforgegradle" version "1.0.7"
+	alias(libs.plugins.quilt.loom)
+	id "net.darkhax.curseforgegradle" version "1.0.7"
+	id 'maven-publish'
 }
 
-apply plugin: 'net.minecraftforge.gradle'
-// Only edit below this line, the above code adds and enables the necessary things for Forge to be setup.
-apply plugin: 'eclipse'
-apply plugin: 'maven-publish'
+version = "${project.mod_version}+${libs.versions.minecraft.get()}"
+archivesBaseName = "${project.modid}_quilt"
+group = project.maven_group
 
-version = "${mod_version}+${mc_version}"
-group = "com.telepathicgrunt"
-archivesBaseName = "${modid}_forge"
-
-java.toolchain.languageVersion = JavaLanguageVersion.of(17)
-
-minecraft {
-    mappings channel: "official", version: "${mc_version}"
-    accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
-
-    runs {
-        client {
-            workingDirectory project.file('run')
-            // Recommended logging data for a userdev environment
-            property 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
-
-            // Needed to make other mods with mixins be able to run in you development environment
-            property 'mixin.env.remapRefMap', 'true'
-            property 'mixin.env.refMapRemappingFile', "${projectDir}/build/createSrgToMcp/output.srg"
-
-            mods { command_structures { source sourceSets.main } }
-        }
-
-        server {
-            workingDirectory project.file('run')
-            // Recommended logging data for a userdev environment
-            property 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
-
-            // Needed to make other mods with mixins be able to run in you development environment
-            property 'mixin.env.remapRefMap', 'true'
-            property 'mixin.env.refMapRemappingFile', "${projectDir}/build/createSrgToMcp/output.srg"
-
-            mods { command_structures {  source sourceSets.main } }
-        }
-    }
-}
-
-repositories {
-}
+repositories {}
 
 dependencies {
-    minecraft "net.minecraftforge:forge:${mc_version}-${forge_version}"
+	minecraft libs.minecraft
+	mappings( loom.layered {
+		addLayer quiltMappings.mappings("org.quiltmc:quilt-mappings:${libs.versions.quilt.mappings.get()}:v2")
+		officialMojangMappings()
+	})
+	modImplementation libs.quilt.loader
+	modImplementation libs.quilted.fabric.api
 }
 
-apply from: 'gradle/manifest.gradle'
+processResources {
+	inputs.property "version", project.version
+
+	filesMatching("quilt.mod.json") {
+		expand "version": project.version
+	}
+}
+
+tasks.withType(JavaCompile).configureEach {
+	it.options.encoding = 'UTF-8'
+	it.options.release.set(17)
+}
+
+java {
+	sourceCompatibility = JavaVersion.VERSION_17
+	targetCompatibility = JavaVersion.VERSION_17
+	withSourcesJar()
+}
+
+jar {
+	from("LICENSE") {
+		rename { "${it}_${archivesBaseName}"}
+	}
+}
+
 apply from: 'gradle/maven.gradle'
 apply from: 'gradle/modrinth.gradle'
 task publishCurseForge(type: net.darkhax.curseforgegradle.TaskPublishCurseForge) {
-    apiToken = "$System.env.CURSEFORGEKEY"
-    int projectId = 565119
-    String changelogText = new File("CHANGELOG.md").getText('UTF-8')
+	apiToken = "$System.env.CURSEFORGEKEY"
+	int projectId = 565119
+	String changelogText = new File("CHANGELOG.md").getText('UTF-8')
 
-    def mainFile = upload(projectId, jar)
-    mainFile.changelog = changelogText
-    mainFile.changelogType = "markdown"
-    mainFile.releaseType = "release"
-    mainFile.displayName = "CommandStructures-Forge v${project.mod_version} (${project.mc_version} MC)"
+	def mainFile = upload(projectId, remapJar)
+	disableVersionDetection()
+	mainFile.addGameVersion("1.18.2")
+
+	mainFile.changelog = changelogText
+	mainFile.changelogType = "markdown"
+	mainFile.releaseType = "alpha"
+	mainFile.displayName = "CommandStructures-Quilt v${project.mod_version} (${libs.versions.minecraft.get()} MC)"
 }
 
 task buildAndRelease {}
 tasks.publish.mustRunAfter tasks.build
 tasks.publishCurseForge.mustRunAfter tasks.publish
 tasks.publishModrinth.mustRunAfter tasks.publish
+tasks.publishCurseForge.dependsOn("remapJar")
 tasks.buildAndRelease.dependsOn(tasks.build, tasks.publish, tasks.publishCurseForge, tasks.publishModrinth)

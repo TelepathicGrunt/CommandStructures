@@ -1,0 +1,18 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "com.telepathicgrunt.commandstructures.mixin",
+  "compatibilityLevel": "JAVA_8",
+  "mixins": [
+    "ChunkMapAccessor",
+    "MineshaftFeatureAccessor",
+    "NetherFortressFeatureAccessor",
+    "OceanMonumentFeatureAccessor",
+    "SinglePoolElementAccessor",
+    "StrongholdFeatureAccessor"
+  ],
+  "client": [],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

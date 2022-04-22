@@ -51,8 +51,8 @@ public class SpawnPiecesCommand {
         String locationArg = "location";
         String savepieceArg = "savepieces";
         String floorblockArg = "floorblock";
-        String fillerblockArg = "fillerblock";
         String rowlengthArg = "rowlength";
+        String fillerblockArg = "fillerblock";
 
         LiteralCommandNode<CommandSourceStack> source = dispatcher.register(Commands.literal(commandString)
                 .requires((permission) -> permission.hasPermission(2))

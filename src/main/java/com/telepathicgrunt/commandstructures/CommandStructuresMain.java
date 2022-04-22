@@ -5,22 +5,24 @@ import com.telepathicgrunt.commandstructures.commands.PlacedFeatureSpawnCommand;
 import com.telepathicgrunt.commandstructures.commands.RawStructureSpawnCommand;
 import com.telepathicgrunt.commandstructures.commands.SpawnPiecesCommand;
 import com.telepathicgrunt.commandstructures.commands.StructureSpawnCommand;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.RegisterCommandsEvent;
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.fml.common.Mod;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.quiltmc.loader.api.ModContainer;
+import org.quiltmc.qsl.base.api.entrypoint.ModInitializer;
+import org.quiltmc.qsl.command.api.CommandRegistrationCallback;
 
-@Mod(CommandStructuresMain.MODID)
-public class CommandStructuresMain {
+public class CommandStructuresMain implements ModInitializer {
 
     public static final Logger LOGGER = LogManager.getLogger();
     public static final String MODID = "command_structures";
 
-    public CommandStructuresMain() {
-        IEventBus forgeBus = MinecraftForge.EVENT_BUS;
-        forgeBus.addListener(this::registerCommand);
+    @Override
+    public void onInitialize(ModContainer mod) {
+        CommandRegistrationCallback.EVENT.register((dispatcher, integrated, dedicated) -> StructureSpawnCommand.dataGenCommand(dispatcher));
+        CommandRegistrationCallback.EVENT.register((dispatcher, integrated, dedicated) -> SpawnPiecesCommand.dataGenCommand(dispatcher));
+        CommandRegistrationCallback.EVENT.register((dispatcher, integrated, dedicated) -> ConfiguredFeatureSpawnCommand.dataGenCommand(dispatcher));
+        CommandRegistrationCallback.EVENT.register((dispatcher, integrated, dedicated) -> PlacedFeatureSpawnCommand.dataGenCommand(dispatcher));
+        CommandRegistrationCallback.EVENT.register((dispatcher, integrated, dedicated) -> RawStructureSpawnCommand.dataGenCommand(dispatcher));
 
         // Silences logspam due to some mc implementations with spawning structures rawly like Mineshafts
         Logger rootLogger = LogManager.getRootLogger();
@@ -30,13 +32,5 @@ public class CommandStructuresMain {
         else {
             LOGGER.error("Registration failed with unexpected class: {}", rootLogger.getClass());
         }
-    }
-
-    private void registerCommand(RegisterCommandsEvent event) {
-        StructureSpawnCommand.dataGenCommand(event.getDispatcher());
-        SpawnPiecesCommand.dataGenCommand(event.getDispatcher());
-        ConfiguredFeatureSpawnCommand.dataGenCommand(event.getDispatcher());
-        PlacedFeatureSpawnCommand.dataGenCommand(event.getDispatcher());
-        RawStructureSpawnCommand.dataGenCommand(event.getDispatcher());
     }
 }
