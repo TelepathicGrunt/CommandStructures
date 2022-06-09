@@ -16,7 +16,8 @@ For developers that want to add this mod to their mod's workspace:
 
 &nbsp;
 
-Don't forget to change \<modversion> with the actual latest version of this mod like `3.0.0` for example. (note, see 1.18 branch for old format if you're on 1.18)
+Don't forget to change \<modversion> with the actual latest version of this mod like `3.0.0` for example.
+(note, see 1.18 Forge branch for old format if you're on 1.18 Forge)
 
 <blockquote>dependencies {
 
