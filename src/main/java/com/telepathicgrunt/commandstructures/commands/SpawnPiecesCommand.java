@@ -6,6 +6,7 @@ import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import com.telepathicgrunt.commandstructures.CommandStructuresMain;
+import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandRuntimeException;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -17,13 +18,14 @@ import net.minecraft.commands.arguments.coordinates.Vec3Argument;
 import net.minecraft.commands.arguments.coordinates.WorldCoordinate;
 import net.minecraft.commands.arguments.coordinates.WorldCoordinates;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.contents.TranslatableContents;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.StructureManager;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.StructureBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -32,8 +34,8 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.StructureMode;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.LevelChunk;
-import net.minecraft.world.level.levelgen.structure.templatesystem.StructureManager;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
+import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplateManager;
 
 import java.util.HashSet;
 import java.util.List;
@@ -45,7 +47,7 @@ public class SpawnPiecesCommand {
     private static MinecraftServer currentMinecraftServer = null;
     private static Set<ResourceLocation> cachedSuggestion = new HashSet<>();
 
-    public static void dataGenCommand(CommandDispatcher<CommandSourceStack> dispatcher) {
+    public static void createCommand(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext buildContext) {
         String commandString = "spawnpieces";
         String rlArg = "resourcelocationpath";
         String locationArg = "location";
@@ -77,12 +79,12 @@ public class SpawnPiecesCommand {
                     spawnPieces(cs.getArgument(rlArg, ResourceLocation.class), Vec3Argument.getCoordinates(cs, locationArg), cs.getArgument(savepieceArg, boolean.class), Blocks.BARRIER.defaultBlockState(), Blocks.AIR.defaultBlockState(), 13, cs);
                     return 1;
                 })
-                .then(Commands.argument(floorblockArg, BlockStateArgument.block())
+                .then(Commands.argument(floorblockArg, BlockStateArgument.block(buildContext))
                 .executes(cs -> {
                     spawnPieces(cs.getArgument(rlArg, ResourceLocation.class), Vec3Argument.getCoordinates(cs, locationArg), cs.getArgument(savepieceArg, boolean.class), BlockStateArgument.getBlock(cs, floorblockArg).getState(), Blocks.AIR.defaultBlockState(), 13, cs);
                     return 1;
                 })
-                .then(Commands.argument(fillerblockArg, BlockStateArgument.block())
+                .then(Commands.argument(fillerblockArg, BlockStateArgument.block(buildContext))
                 .executes(cs -> {
                     spawnPieces(cs.getArgument(rlArg, ResourceLocation.class), Vec3Argument.getCoordinates(cs, locationArg), cs.getArgument(savepieceArg, boolean.class), BlockStateArgument.getBlock(cs, floorblockArg).getState(), BlockStateArgument.getBlock(cs, fillerblockArg).getState(), 13, cs);
                     return 1;
@@ -104,7 +106,8 @@ public class SpawnPiecesCommand {
 
         ResourceManager resourceManager = cs.getSource().getLevel().getServer().getResourceManager();
         Set<String> modidStrings = new HashSet<>();
-        Set<ResourceLocation> rlSet = resourceManager.listResources("structures", (filename) -> filename.endsWith(".nbt"))
+        Set<ResourceLocation> rlSet = resourceManager.listResources("structures", (filename) -> filename.toString().endsWith(".nbt"))
+                .keySet()
                 .stream()
                 .map(resourceLocation -> {
                     String namespace = resourceLocation.getNamespace();
@@ -144,7 +147,7 @@ public class SpawnPiecesCommand {
         if(nbtRLs.isEmpty()) {
             String errorMsg = path + " path has no nbt pieces in it. No pieces will be placed.";
             CommandStructuresMain.LOGGER.error(errorMsg);
-            throw new CommandRuntimeException(new TextComponent(errorMsg));
+            throw new CommandRuntimeException(MutableComponent.create(new TranslatableContents(errorMsg)));
         }
 
         // Size of area we will need
@@ -198,7 +201,7 @@ public class SpawnPiecesCommand {
                 }
                 currentSection++;
                 if(player != null) {
-                    player.displayClientMessage(new TranslatableComponent("Working: %" +  Math.round(((float)currentSection / maxChunks) * 100f)), true);
+                    player.displayClientMessage(MutableComponent.create(new TranslatableContents("Working: %" +  Math.round(((float)currentSection / maxChunks) * 100f))), true);
                 }
             }
             mutableChunk.set(mutableChunk.getX(), mutableChunk.getY(), pos.getZ() >> 4); // Set back to start of row
@@ -209,7 +212,8 @@ public class SpawnPiecesCommand {
 
     private static List<ResourceLocation> getResourceLocations(Player player, ServerLevel world, String modId, String filter) {
         ResourceManager resourceManager = world.getServer().getResourceManager();
-        return resourceManager.listResources("structures", (filename) -> filename.endsWith(".nbt"))
+        return resourceManager.listResources("structures", (filename) -> filename.toString().endsWith(".nbt"))
+                .keySet()
                 .stream()
                 .filter(resourceLocation -> resourceLocation.getNamespace().equals(modId))
                 .filter(resourceLocation -> resourceLocation.getPath().startsWith("structures/" + filter))
@@ -223,7 +227,7 @@ public class SpawnPiecesCommand {
 
         for(int pieceIndex = 1; pieceIndex <= nbtRLs.size(); pieceIndex++) {
             if(player != null) {
-                player.displayClientMessage(new TranslatableComponent(" Working making structure: " + nbtRLs.get(pieceIndex - 1)), true);
+                player.displayClientMessage(MutableComponent.create(new TranslatableContents(" Working making structure: " + nbtRLs.get(pieceIndex - 1))), true);
             }
 
             world.setBlock(mutable, Blocks.STRUCTURE_BLOCK.defaultBlockState().setValue(StructureBlock.MODE, StructureMode.LOAD), 3);
@@ -256,7 +260,7 @@ public class SpawnPiecesCommand {
 
     // Needed so that structure void is preserved in structure pieces.
     private static void fillStructureVoidSpace(ServerLevel world, ResourceLocation resourceLocation, BlockPos startSpot) {
-        StructureManager structuremanager = world.getStructureManager();
+        StructureTemplateManager structuremanager = world.getStructureManager();
         Optional<StructureTemplate> optional = structuremanager.get(resourceLocation);
         optional.ifPresent(template -> {
             BlockPos.MutableBlockPos mutable = startSpot.mutable();

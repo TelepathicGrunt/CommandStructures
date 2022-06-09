@@ -8,6 +8,7 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import com.telepathicgrunt.commandstructures.CommandStructuresMain;
 import com.telepathicgrunt.commandstructures.Utilities;
+import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandRuntimeException;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -19,21 +20,21 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.data.worldgen.ProcessorLists;
-import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.contents.TranslatableContents;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.chunk.ChunkGenerator;
+import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.LegacyRandomSource;
 import net.minecraft.world.level.levelgen.RandomSupport;
 import net.minecraft.world.level.levelgen.WorldgenRandom;
 import net.minecraft.world.level.levelgen.XoroshiroRandomSource;
-import net.minecraft.world.level.levelgen.feature.configurations.JigsawConfiguration;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.PoolElementStructurePiece;
+import net.minecraft.world.level.levelgen.structure.Structure;
 import net.minecraft.world.level.levelgen.structure.StructurePiece;
-import net.minecraft.world.level.levelgen.structure.pieces.PieceGenerator;
-import net.minecraft.world.level.levelgen.structure.pieces.PieceGeneratorSupplier;
-import net.minecraft.world.level.levelgen.structure.pieces.StructurePiecesBuilder;
 import net.minecraft.world.level.levelgen.structure.pools.JigsawPlacement;
 import net.minecraft.world.level.levelgen.structure.pools.SinglePoolElement;
 import net.minecraft.world.level.levelgen.structure.pools.StructureTemplatePool;
@@ -44,7 +45,7 @@ import java.util.Optional;
 import java.util.Set;
 
 public class StructureSpawnCommand {
-    public static void dataGenCommand(CommandDispatcher<CommandSourceStack> dispatcher) {
+    public static void createCommand(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext buildContext) {
         String commandString = "spawnstructure";
         String locationArg = "location";
         String poolArg = "startpoolresourcelocation";
@@ -113,51 +114,38 @@ public class StructureSpawnCommand {
         if(templatePool == null || templatePool.size() == 0) {
             String errorMsg = structureStartPoolRL + " template pool does not exist or is empty";
             CommandStructuresMain.LOGGER.error(errorMsg);
-            throw new CommandRuntimeException(new TextComponent(errorMsg));
+            throw new CommandRuntimeException(MutableComponent.create(new TranslatableContents(errorMsg)));
         }
 
-        JigsawConfiguration newConfig = new JigsawConfiguration(
-                Holder.direct(templatePool),
-                depth
-        );
-
-        // Create a new context with the new config that has our json pool. We will pass this into JigsawPlacement.addPieces
-        PieceGeneratorSupplier.Context<JigsawConfiguration> newContext = new PieceGeneratorSupplier.Context<>(
+        long finalSeed = randomSeed == null ? level.getSeed() : randomSeed;
+        ChunkPos chunkPos = randomSeed == null ? new ChunkPos(centerPos) : new ChunkPos(0, 0);
+        Structure.GenerationContext newGenerationContext = new Structure.GenerationContext(
+                level.registryAccess(),
                 level.getChunkSource().getGenerator(),
                 level.getChunkSource().getGenerator().getBiomeSource(),
-                randomSeed == null ? level.getSeed() : randomSeed,
-                randomSeed == null ? new ChunkPos(centerPos) : new ChunkPos(0, 0),
-                newConfig,
-                level,
-                (b) -> true,
+                level.getChunkSource().randomState(),
                 level.getStructureManager(),
-                level.registryAccess()
+                finalSeed,
+                chunkPos,
+                level,
+                (biomeHolder) -> true
         );
 
-        Optional<PieceGenerator<JigsawConfiguration>> pieceGenerator = JigsawPlacement.addPieces(
-                newContext,
-                PoolElementStructurePiece::new,
+        Optional<Structure.GenerationStub> pieceGenerator = JigsawPlacement.addPieces(
+                newGenerationContext,
+                Holder.direct(templatePool),
+                Optional.empty(),
+                depth,
                 centerPos,
                 legacyBoundingBoxRule,
-                heightmapSnap);
+                heightmapSnap ? Optional.of(Heightmap.Types.WORLD_SURFACE_WG) : Optional.empty(),
+                80);
 
         if(pieceGenerator.isPresent()) {
-            StructurePiecesBuilder structurepiecesbuilder = new StructurePiecesBuilder();
-            pieceGenerator.get().generatePieces(
-                    structurepiecesbuilder,
-                    new PieceGenerator.Context<>(
-                            newContext.config(),
-                            newContext.chunkGenerator(),
-                            newContext.structureManager(),
-                            newContext.chunkPos(),
-                            newContext.heightAccessor(),
-                            new WorldgenRandom(new LegacyRandomSource(0L)),
-                            newContext.seed()));
-
             WorldgenRandom worldgenrandom;
             if(randomSeed == null) {
-                worldgenrandom = new WorldgenRandom(new XoroshiroRandomSource(RandomSupport.seedUniquifier()));
-                long i = worldgenrandom.setDecorationSeed(newContext.seed(), centerPos.getX(), centerPos.getZ());
+                worldgenrandom = new WorldgenRandom(new XoroshiroRandomSource(RandomSupport.generateUniqueSeed()));
+                long i = worldgenrandom.setDecorationSeed(finalSeed, centerPos.getX(), centerPos.getZ());
                 worldgenrandom.setFeatureSeed(i, 0, 0);
             }
             else {
@@ -165,7 +153,8 @@ public class StructureSpawnCommand {
             }
 
             BlockPos finalCenterPos = centerPos;
-            List<StructurePiece> structurePieceList = structurepiecesbuilder.build().pieces();
+            List<StructurePiece> structurePieceList = pieceGenerator.get().getPiecesBuilder().build().pieces();
+
 
             structurePieceList.forEach(piece -> {
                 if(disableProcessors) {
@@ -173,13 +162,13 @@ public class StructureSpawnCommand {
                         if(poolElementStructurePiece.getElement() instanceof SinglePoolElement singlePoolElement) {
                             Holder<StructureProcessorList> oldProcessorList = singlePoolElement.processors;
                             singlePoolElement.processors = ProcessorLists.EMPTY;
-                            generatePiece(level, newContext, worldgenrandom, finalCenterPos, piece);
+                            generatePiece(level, level.getChunkSource().getGenerator(), chunkPos, worldgenrandom, finalCenterPos, piece);
                             singlePoolElement.processors = oldProcessorList; // Set the processors back or else our change is permanent.
                         }
                     }
                 }
                 else {
-                    generatePiece(level, newContext, worldgenrandom, finalCenterPos, piece);
+                    generatePiece(level, level.getLevel().getChunkSource().getGenerator(), chunkPos, worldgenrandom, finalCenterPos, piece);
                 }
             });
 
@@ -191,24 +180,24 @@ public class StructureSpawnCommand {
             else {
                 String errorMsg = structureStartPoolRL + " Template Pool spawned no pieces.";
                 CommandStructuresMain.LOGGER.error(errorMsg);
-                throw new CommandRuntimeException(new TextComponent(errorMsg));
+                throw new CommandRuntimeException(MutableComponent.create(new TranslatableContents(errorMsg)));
             }
         }
         else {
             String errorMsg = structureStartPoolRL + " Template Pool spawned no pieces.";
             CommandStructuresMain.LOGGER.error(errorMsg);
-            throw new CommandRuntimeException(new TextComponent(errorMsg));
+            throw new CommandRuntimeException(MutableComponent.create(new TranslatableContents(errorMsg)));
         }
     }
 
-    private static void generatePiece(ServerLevel level, PieceGeneratorSupplier.Context<JigsawConfiguration> newContext, WorldgenRandom worldgenrandom, BlockPos finalCenterPos, StructurePiece piece) {
+    private static void generatePiece(ServerLevel level, ChunkGenerator chunkGenerator, ChunkPos chunkPos, WorldgenRandom worldgenrandom, BlockPos finalCenterPos, StructurePiece piece) {
         piece.postProcess(
                 level,
-                level.structureFeatureManager(),
-                newContext.chunkGenerator(),
+                level.structureManager(),
+                chunkGenerator,
                 worldgenrandom,
                 BoundingBox.infinite(),
-                newContext.chunkPos(),
+                chunkPos,
                 finalCenterPos
         );
     }

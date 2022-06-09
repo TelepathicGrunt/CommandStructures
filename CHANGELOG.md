@@ -1,3 +1,9 @@
+## **(V.3.0.0 Changes) (1.19.0 Minecraft)**
+
+##### Command:
+Ported to 1.19 but removed /spawnrawstructure, /spawnfeature, and /spawnplacedfeature commands because vanilla's /place command is the replacement.
+
+
 ## **(V.2.0.1 Changes) (1.18.2 Minecraft)**
 
 ##### Command:

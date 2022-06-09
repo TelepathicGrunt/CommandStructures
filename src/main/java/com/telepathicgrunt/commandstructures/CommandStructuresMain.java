@@ -1,10 +1,9 @@
 package com.telepathicgrunt.commandstructures;
 
-import com.telepathicgrunt.commandstructures.commands.ConfiguredFeatureSpawnCommand;
-import com.telepathicgrunt.commandstructures.commands.PlacedFeatureSpawnCommand;
-import com.telepathicgrunt.commandstructures.commands.RawStructureSpawnCommand;
 import com.telepathicgrunt.commandstructures.commands.SpawnPiecesCommand;
 import com.telepathicgrunt.commandstructures.commands.StructureSpawnCommand;
+import net.minecraft.commands.CommandBuildContext;
+import net.minecraft.core.RegistryAccess;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
@@ -33,10 +32,8 @@ public class CommandStructuresMain {
     }
 
     private void registerCommand(RegisterCommandsEvent event) {
-        StructureSpawnCommand.dataGenCommand(event.getDispatcher());
-        SpawnPiecesCommand.dataGenCommand(event.getDispatcher());
-        ConfiguredFeatureSpawnCommand.dataGenCommand(event.getDispatcher());
-        PlacedFeatureSpawnCommand.dataGenCommand(event.getDispatcher());
-        RawStructureSpawnCommand.dataGenCommand(event.getDispatcher());
+        CommandBuildContext buildContext = new CommandBuildContext(RegistryAccess.BUILTIN.get());
+        StructureSpawnCommand.createCommand(event.getDispatcher(), buildContext);
+        SpawnPiecesCommand.createCommand(event.getDispatcher(), buildContext);
     }
 }
