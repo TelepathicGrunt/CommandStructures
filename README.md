@@ -16,7 +16,7 @@ For developers that want to add this mod to their mod's workspace:
 
 &nbsp;
 
-Don't forget to change \<modversion> with the actual latest version of this mod like `1.2.1` for example.
+Don't forget to change \<modversion> with the actual latest version of this mod like `3.0.0` for example. (note, see 1.18 branch for old format if you're on 1.18)
 
 <blockquote>dependencies {
 
@@ -24,7 +24,7 @@ Don't forget to change \<modversion> with the actual latest version of this mod 
 &nbsp; ...
 
 
-&nbsp; runtimeOnly fg.deobf("com.telepathicgrunt:CommandStructures:\<modversion>+1.18.1")
+&nbsp; runtimeOnly fg.deobf("com.telepathicgrunt:CommandStructures-Forge:\<modversion>+1.19")
 
 
 }</blockquote>
