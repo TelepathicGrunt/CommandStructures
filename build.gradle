@@ -10,8 +10,7 @@ buildscript {
 }
 plugins {
 	id "net.darkhax.curseforgegradle" version "1.0.7"
-	id 'fabric-loom' version '0.10-SNAPSHOT'
-	id 'io.github.juuxel.loom-quiltflower-mini' version '1.1.0'
+	id 'fabric-loom' version '0.12-SNAPSHOT'
 	id 'maven-publish'
 }
 
@@ -19,13 +18,13 @@ sourceCompatibility = JavaVersion.VERSION_17
 targetCompatibility = JavaVersion.VERSION_17
 
 version = "${project.mod_version}+${project.minecraft_version}"
-archivesBaseName = "${project.modid}_fabric"
+archivesBaseName = "${project.modid}"
 group = project.maven_group
 
 repositories {}
 dependencies {
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
-	mappings minecraft.officialMojangMappings()
+	mappings loom.officialMojangMappings()
 	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
 
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
