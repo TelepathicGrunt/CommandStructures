@@ -21,7 +21,7 @@ apply plugin: 'maven-publish'
 
 version = "${mod_version}+${mc_version}"
 group = "com.telepathicgrunt"
-archivesBaseName = "${modid}"
+archivesBaseName = "${modid}_forge"
 
 java.toolchain.languageVersion = JavaLanguageVersion.of(17)
 

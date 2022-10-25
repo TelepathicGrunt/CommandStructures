@@ -1,5 +1,6 @@
 package com.telepathicgrunt.commandstructures;
 
+import com.telepathicgrunt.commandstructures.commands.SpawnMobsCommand;
 import com.telepathicgrunt.commandstructures.commands.SpawnPiecesCommand;
 import com.telepathicgrunt.commandstructures.commands.StructureSpawnCommand;
 import net.minecraft.commands.CommandBuildContext;
@@ -35,5 +36,6 @@ public class CommandStructuresMain {
         CommandBuildContext buildContext = new CommandBuildContext(RegistryAccess.BUILTIN.get());
         StructureSpawnCommand.createCommand(event.getDispatcher(), buildContext);
         SpawnPiecesCommand.createCommand(event.getDispatcher(), buildContext);
+        SpawnMobsCommand.createCommand(event.getDispatcher(), buildContext);
     }
 }

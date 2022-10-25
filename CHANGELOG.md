@@ -1,3 +1,9 @@
+## **(V.3.1.0 Changes) (1.19.0 Minecraft)**
+
+##### Command:
+Added /spawnmob command to spawn all mobs if desired.
+
+
 ## **(V.3.0.0 Changes) (1.19.0 Minecraft)**
 
 ##### Command:
