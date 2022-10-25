@@ -1,5 +1,6 @@
 package com.telepathicgrunt.commandstructures;
 
+import com.telepathicgrunt.commandstructures.commands.SpawnMobsCommand;
 import com.telepathicgrunt.commandstructures.commands.SpawnPiecesCommand;
 import com.telepathicgrunt.commandstructures.commands.StructureSpawnCommand;
 import net.fabricmc.api.ModInitializer;
@@ -16,6 +17,7 @@ public class CommandStructuresMain implements ModInitializer {
     public void onInitialize() {
         CommandRegistrationCallback.EVENT.register((dispatcher, buildContext, dedicated) -> StructureSpawnCommand.createCommand(dispatcher, buildContext));
         CommandRegistrationCallback.EVENT.register((dispatcher, buildContext, dedicated) -> SpawnPiecesCommand.dataGenCommand(dispatcher, buildContext));
+        CommandRegistrationCallback.EVENT.register((dispatcher, buildContext, dedicated) -> SpawnMobsCommand.dataGenCommand(dispatcher, buildContext));
 
         // Silences logspam due to some mc implementations with spawning structures rawly like Mineshafts
         Logger rootLogger = LogManager.getRootLogger();
