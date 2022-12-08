@@ -33,9 +33,8 @@ public class CommandStructuresMain {
     }
 
     private void registerCommand(RegisterCommandsEvent event) {
-        CommandBuildContext buildContext = new CommandBuildContext(RegistryAccess.BUILTIN.get());
-        StructureSpawnCommand.createCommand(event.getDispatcher(), buildContext);
-        SpawnPiecesCommand.createCommand(event.getDispatcher(), buildContext);
-        SpawnMobsCommand.createCommand(event.getDispatcher(), buildContext);
+        StructureSpawnCommand.createCommand(event.getDispatcher(), event.getBuildContext());
+        SpawnPiecesCommand.createCommand(event.getDispatcher(), event.getBuildContext());
+        SpawnMobsCommand.createCommand(event.getDispatcher(), event.getBuildContext());
     }
 }

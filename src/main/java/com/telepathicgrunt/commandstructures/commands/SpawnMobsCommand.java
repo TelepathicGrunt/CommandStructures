@@ -17,6 +17,7 @@ import net.minecraft.commands.arguments.coordinates.WorldCoordinates;
 import net.minecraft.commands.synchronization.SuggestionProviders;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.contents.TranslatableContents;
 import net.minecraft.resources.ResourceLocation;
@@ -100,7 +101,7 @@ public class SpawnMobsCommand {
         }
 
         Set<String> modidStrings = new HashSet<>();
-        Registry.ENTITY_TYPE.entrySet().forEach((entry) -> {
+        BuiltInRegistries.ENTITY_TYPE.entrySet().forEach((entry) -> {
             if (entry.getValue().canSummon()) {
                 modidStrings.add(entry.getKey().location().getNamespace());
             }
@@ -116,7 +117,7 @@ public class SpawnMobsCommand {
         Player player = cs.getSource().getEntity() instanceof Player player1 ? player1 : null;
         BlockPos pos = coordinates.getBlockPos(cs.getSource());
 
-        List<EntityType<?>> types = Registry.ENTITY_TYPE.entrySet().stream()
+        List<EntityType<?>> types = BuiltInRegistries.ENTITY_TYPE.entrySet().stream()
                 .filter(e -> namespace.equals("all") || e.getKey().location().getNamespace().equals(namespace))
                 .map(Map.Entry::getValue)
                 .collect(Collectors.toList());
@@ -149,8 +150,8 @@ public class SpawnMobsCommand {
 
         int maxChunks = (endChunkX - mutableChunk.getX()) * (endChunkZ - mutableChunk.getZ());
         int currentSection = 0;
-        for(; mutableChunk.getX() < endChunkX; mutableChunk.move(1,0,0)) {
-            for (; mutableChunk.getZ() < endChunkZ; mutableChunk.move(0, 0, 1)) {
+        for(; mutableChunk.getX() <= endChunkX; mutableChunk.move(1,0,0)) {
+            for (; mutableChunk.getZ() <= endChunkZ; mutableChunk.move(0, 0, 1)) {
                 LevelChunk chunk = world.getChunk(mutableChunk.getX(), mutableChunk.getZ());
                 BlockPos.MutableBlockPos mutable = new BlockPos(mutableChunk.getX() << 4, pos.getY(), mutableChunk.getZ() << 4).mutable();
                 mutable.move(-1, 0, 0);
@@ -186,6 +187,7 @@ public class SpawnMobsCommand {
 
     private static void spawnMobs(ServerLevel world, BlockPos pos, Player player, List<Entity> entities, int columnCount, int spacing) {
         BlockPos.MutableBlockPos mutable = new BlockPos.MutableBlockPos().set(((pos.getX() >> 4) + 1) << 4, pos.getY(), (pos.getZ() >> 4) << 4);
+        mutable.move(7, 1, 7);
 
         for(int mobIndex = 1; mobIndex <= entities.size(); mobIndex++) {
             if(player != null) {
