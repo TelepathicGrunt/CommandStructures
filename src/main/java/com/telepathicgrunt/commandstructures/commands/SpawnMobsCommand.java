@@ -138,8 +138,8 @@ public class SpawnMobsCommand {
 
         int maxChunks = (endChunkX - mutableChunk.getX()) * (endChunkZ - mutableChunk.getZ());
         int currentSection = 0;
-        for(; mutableChunk.getX() < endChunkX; mutableChunk.move(1,0,0)) {
-            for (; mutableChunk.getZ() < endChunkZ; mutableChunk.move(0, 0, 1)) {
+        for(; mutableChunk.getX() <= endChunkX; mutableChunk.move(1,0,0)) {
+            for (; mutableChunk.getZ() <= endChunkZ; mutableChunk.move(0, 0, 1)) {
                 LevelChunk chunk = world.getChunk(mutableChunk.getX(), mutableChunk.getZ());
                 BlockPos.MutableBlockPos mutable = new BlockPos(mutableChunk.getX() << 4, pos.getY(), mutableChunk.getZ() << 4).mutable();
                 mutable.move(-1, 0, 0);

@@ -1,3 +1,9 @@
+## **(V.4.0.1 Changes) (1.19.3 Minecraft)**
+
+##### Misc:
+Fixed /spawnmobs not clearing last column of mobs
+
+
 ## **(V.4.0.0 Changes) (1.19.3 Minecraft)**
 
 ##### Major:
