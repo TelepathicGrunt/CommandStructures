@@ -20,9 +20,11 @@ import net.minecraft.commands.arguments.coordinates.Vec3Argument;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.data.worldgen.ProcessorLists;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.contents.TranslatableContents;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.ChunkPos;
@@ -102,7 +104,7 @@ public class StructureSpawnCommand {
     }
 
     private static Set<ResourceLocation> startPoolSuggestions(CommandContext<CommandSourceStack> cs) {
-        return cs.getSource().getLevel().registryAccess().registryOrThrow(Registry.TEMPLATE_POOL_REGISTRY).keySet();
+        return cs.getSource().getLevel().registryAccess().registryOrThrow(Registries.TEMPLATE_POOL).keySet();
     }
 
     private static void generateStructure(Coordinates coordinates, ResourceLocation structureStartPoolRL, int depth, boolean heightmapSnap, boolean legacyBoundingBoxRule, boolean disableProcessors, boolean sendChunkLightingPacket, Long randomSeed, CommandContext<CommandSourceStack> cs) {
@@ -110,7 +112,7 @@ public class StructureSpawnCommand {
         BlockPos centerPos = coordinates.getBlockPos(cs.getSource());
         if(heightmapSnap) centerPos = centerPos.below(centerPos.getY()); //not a typo. Needed so heightmap is not offset by player height.
 
-        StructureTemplatePool templatePool = level.registryAccess().ownedRegistryOrThrow(Registry.TEMPLATE_POOL_REGISTRY).get(structureStartPoolRL);
+        StructureTemplatePool templatePool = level.registryAccess().registryOrThrow(Registries.TEMPLATE_POOL).get(structureStartPoolRL);
 
         if(templatePool == null || templatePool.size() == 0) {
             String errorMsg = structureStartPoolRL + " template pool does not exist or is empty";
@@ -162,7 +164,9 @@ public class StructureSpawnCommand {
                     if(piece instanceof PoolElementStructurePiece poolElementStructurePiece) {
                         if(poolElementStructurePiece.getElement() instanceof SinglePoolElement singlePoolElement) {
                             Holder<StructureProcessorList> oldProcessorList = ((SinglePoolElementAccessor)singlePoolElement).getProcessors();
-                            ((SinglePoolElementAccessor)singlePoolElement).setProcessors(ProcessorLists.EMPTY);
+                            ResourceKey<StructureProcessorList> emptyKey = ResourceKey.create(Registries.PROCESSOR_LIST, new ResourceLocation("minecraft", "empty"));
+                            Optional<Holder.Reference<StructureProcessorList>> emptyProcessorList = cs.getSource().getLevel().registryAccess().registryOrThrow(Registries.PROCESSOR_LIST).getHolder(emptyKey);
+                            ((SinglePoolElementAccessor)singlePoolElement).setProcessors(emptyProcessorList.get());
                             generatePiece(level, level.getChunkSource().getGenerator(), chunkPos, worldgenrandom, finalCenterPos, piece);
                             ((SinglePoolElementAccessor)singlePoolElement).setProcessors(oldProcessorList); // Set the processors back or else our change is permanent.
                         }
