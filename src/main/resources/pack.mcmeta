@@ -1,7 +1,6 @@
 {
     "pack": {
         "description": "Command Structure resources",
-        "pack_format": 10,
-        "_comment": "Happy modding!"
+        "pack_format": 13
     }
 }

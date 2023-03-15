@@ -1,3 +1,5 @@
+import com.modrinth.minotaur.TaskModrinthUpload
+
 buildscript {
     repositories {
         maven { url = 'https://maven.minecraftforge.net' }
@@ -6,18 +8,19 @@ buildscript {
     }
     dependencies {
         classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '5.1.+', changing: true
-        classpath group: 'gradle.plugin.com.modrinth.minotaur', name: 'Minotaur', version: '1.2.1'
     }
 }
 
 plugins {
     id "net.darkhax.curseforgegradle" version "1.0.7"
+    id "com.modrinth.minotaur" version "2.+"
 }
 
 apply plugin: 'net.minecraftforge.gradle'
 // Only edit below this line, the above code adds and enables the necessary things for Forge to be setup.
 apply plugin: 'eclipse'
 apply plugin: 'maven-publish'
+apply plugin: "com.modrinth.minotaur"
 
 version = "${mod_version}+${mc_version}"
 group = "com.telepathicgrunt"
@@ -65,21 +68,34 @@ dependencies {
 
 apply from: 'gradle/manifest.gradle'
 apply from: 'gradle/maven.gradle'
-apply from: 'gradle/modrinth.gradle'
+
+String changelogText = file("CHANGELOG.md").getText('UTF-8')
 task publishCurseForge(type: net.darkhax.curseforgegradle.TaskPublishCurseForge) {
     apiToken = "$System.env.CURSEFORGEKEY"
     int projectId = 565119
-    String changelogText = new File("CHANGELOG.md").getText('UTF-8')
 
     def mainFile = upload(projectId, jar)
     mainFile.changelog = changelogText
     mainFile.changelogType = "markdown"
     mainFile.releaseType = "release"
     mainFile.displayName = "CommandStructures-Forge v${project.mod_version} (${project.mc_version} MC)"
+    mainFile.addGameVersion("${project.mc_version}")
+}
+
+modrinth {
+    token = "$System.env.MODRINTH"
+    projectId = 'WEfvvlnl'
+    versionName = "CommandStructures-Forge"
+    versionNumber = project.version + "_forge"
+    uploadFile = jar
+    versionType = "RELEASE"
+    changelog = changelogText
+    gameVersions = ["${project.mc_version}"]
+    loaders = ['forge']
 }
 
 task buildAndRelease {}
 tasks.publish.mustRunAfter tasks.build
 tasks.publishCurseForge.mustRunAfter tasks.publish
-tasks.publishModrinth.mustRunAfter tasks.publish
-tasks.buildAndRelease.dependsOn(tasks.build, tasks.publish, tasks.publishCurseForge, tasks.publishModrinth)
+tasks.modrinth.mustRunAfter tasks.publish
+tasks.buildAndRelease.dependsOn(tasks.build, tasks.publish, tasks.publishCurseForge, tasks.modrinth)

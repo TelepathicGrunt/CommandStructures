@@ -18,6 +18,7 @@ import net.minecraft.commands.arguments.coordinates.Vec3Argument;
 import net.minecraft.commands.arguments.coordinates.WorldCoordinate;
 import net.minecraft.commands.arguments.coordinates.WorldCoordinates;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.contents.TranslatableContents;
 import net.minecraft.resources.ResourceLocation;
@@ -147,7 +148,7 @@ public class SpawnPiecesCommand {
         if(nbtRLs.isEmpty()) {
             String errorMsg = path + " path has no nbt pieces in it. No pieces will be placed.";
             CommandStructuresMain.LOGGER.error(errorMsg);
-            throw new CommandRuntimeException(MutableComponent.create(new TranslatableContents(errorMsg)));
+            throw new CommandRuntimeException(Component.translatable(errorMsg));
         }
 
         // Size of area we will need
@@ -201,7 +202,7 @@ public class SpawnPiecesCommand {
                 }
                 currentSection++;
                 if(player != null) {
-                    player.displayClientMessage(MutableComponent.create(new TranslatableContents("Working: %" +  Math.round(((float)currentSection / maxChunks) * 100f))), true);
+                    player.displayClientMessage(Component.translatable("Working: %" +  Math.round(((float)currentSection / maxChunks) * 100f)), true);
                 }
             }
             mutableChunk.set(mutableChunk.getX(), mutableChunk.getY(), pos.getZ() >> 4); // Set back to start of row
@@ -227,7 +228,7 @@ public class SpawnPiecesCommand {
 
         for(int pieceIndex = 1; pieceIndex <= nbtRLs.size(); pieceIndex++) {
             if(player != null) {
-                player.displayClientMessage(MutableComponent.create(new TranslatableContents(" Working making structure: " + nbtRLs.get(pieceIndex - 1))), true);
+                player.displayClientMessage(Component.translatable(" Working making structure: " + nbtRLs.get(pieceIndex - 1)), true);
             }
 
             world.setBlock(mutable, Blocks.STRUCTURE_BLOCK.defaultBlockState().setValue(StructureBlock.MODE, StructureMode.LOAD), 3);

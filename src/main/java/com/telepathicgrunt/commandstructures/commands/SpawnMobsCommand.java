@@ -18,6 +18,7 @@ import net.minecraft.commands.synchronization.SuggestionProviders;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.contents.TranslatableContents;
 import net.minecraft.resources.ResourceLocation;
@@ -178,7 +179,7 @@ public class SpawnMobsCommand {
                 }
                 currentSection++;
                 if(player != null) {
-                    player.displayClientMessage(MutableComponent.create(new TranslatableContents("Working: %" +  Math.round(((float)currentSection / maxChunks) * 100f))), true);
+                    player.displayClientMessage(Component.translatable("Working: %" +  Math.round(((float)currentSection / maxChunks) * 100f)), true);
                 }
             }
             mutableChunk.set(mutableChunk.getX(), mutableChunk.getY(), pos.getZ() >> 4); // Set back to start of row
@@ -191,7 +192,7 @@ public class SpawnMobsCommand {
 
         for(int mobIndex = 1; mobIndex <= entities.size(); mobIndex++) {
             if(player != null) {
-                player.displayClientMessage(MutableComponent.create(new TranslatableContents(" Spawning mobs")), true);
+                player.displayClientMessage(Component.translatable(" Spawning mobs"), true);
             }
 
             Entity entity = entities.get(mobIndex - 1);
