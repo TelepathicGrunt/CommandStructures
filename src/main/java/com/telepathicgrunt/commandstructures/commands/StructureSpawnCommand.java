@@ -22,6 +22,7 @@ import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.data.worldgen.ProcessorLists;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.contents.TranslatableContents;
 import net.minecraft.resources.ResourceKey;
@@ -117,7 +118,7 @@ public class StructureSpawnCommand {
         if(templatePool == null || templatePool.size() == 0) {
             String errorMsg = structureStartPoolRL + " template pool does not exist or is empty";
             CommandStructuresMain.LOGGER.error(errorMsg);
-            throw new CommandRuntimeException(MutableComponent.create(new TranslatableContents(errorMsg)));
+            throw new CommandRuntimeException(Component.translatable(errorMsg));
         }
 
         long finalSeed = randomSeed == null ? level.getSeed() : randomSeed;
@@ -185,13 +186,13 @@ public class StructureSpawnCommand {
             else {
                 String errorMsg = structureStartPoolRL + " Template Pool spawned no pieces.";
                 CommandStructuresMain.LOGGER.error(errorMsg);
-                throw new CommandRuntimeException(MutableComponent.create(new TranslatableContents(errorMsg)));
+                throw new CommandRuntimeException(Component.translatable(errorMsg));
             }
         }
         else {
             String errorMsg = structureStartPoolRL + " Template Pool spawned no pieces.";
             CommandStructuresMain.LOGGER.error(errorMsg);
-            throw new CommandRuntimeException(MutableComponent.create(new TranslatableContents(errorMsg)));
+            throw new CommandRuntimeException(Component.translatable(errorMsg));
         }
     }
 

@@ -1,18 +1,20 @@
-import net.fabricmc.loom.task.RemapJarTask
-
 buildscript {
 	repositories {
 		maven { url "https://plugins.gradle.org/m2/" }
 	}
 	dependencies {
-		classpath group: 'gradle.plugin.com.modrinth.minotaur', name: 'Minotaur', version: '1.2.1'
 	}
 }
+
 plugins {
+	id "com.modrinth.minotaur" version "2.+"
 	id "net.darkhax.curseforgegradle" version "1.0.7"
 	id 'fabric-loom' version '0.12-SNAPSHOT'
 	id 'maven-publish'
 }
+
+apply plugin: 'maven-publish'
+apply plugin: "com.modrinth.minotaur"
 
 sourceCompatibility = JavaVersion.VERSION_17
 targetCompatibility = JavaVersion.VERSION_17
@@ -52,11 +54,12 @@ jar {
 }
 
 apply from: 'gradle/maven.gradle'
-apply from: 'gradle/modrinth.gradle'
+
+String changelogText = file("CHANGELOG.md").getText('UTF-8')
+
 task publishCurseForge(type: net.darkhax.curseforgegradle.TaskPublishCurseForge) {
 	apiToken = "$System.env.CURSEFORGEKEY"
 	int projectId = 565119
-	String changelogText = new File("CHANGELOG.md").getText('UTF-8')
 
 	def mainFile = upload(projectId, remapJar)
 	mainFile.changelog = changelogText
@@ -65,9 +68,24 @@ task publishCurseForge(type: net.darkhax.curseforgegradle.TaskPublishCurseForge)
 	mainFile.displayName = "CommandStructures-Fabric v${project.mod_version} (${project.minecraft_version} MC)"
 }
 
+modrinth {
+	token = "$System.env.MODRINTH"
+	versionName = "CommandStructures-Fabric"
+	versionNumber = project.version + "_fabric"
+	uploadFile = remapJar
+	projectId = 'WEfvvlnl'
+	versionType = "RELEASE"
+	changelog = changelogText
+	gameVersions = ["${project.minecraft_version}"]
+	loaders = ['fabric']
+	dependencies {
+		required.project "fabric-api"
+	}
+}
+
 task buildAndRelease {}
 tasks.publish.mustRunAfter tasks.build
 tasks.publishCurseForge.mustRunAfter tasks.publish
-tasks.publishModrinth.mustRunAfter tasks.publish
+tasks.modrinth.mustRunAfter tasks.publish
 tasks.publishCurseForge.dependsOn("remapJar")
-tasks.buildAndRelease.dependsOn(tasks.build, tasks.publish, tasks.publishCurseForge, tasks.publishModrinth)
+tasks.buildAndRelease.dependsOn(tasks.build, tasks.publish, tasks.publishCurseForge, tasks.modrinth)
