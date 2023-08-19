@@ -14,18 +14,11 @@ import net.minecraft.commands.arguments.coordinates.Coordinates;
 import net.minecraft.commands.arguments.coordinates.Vec3Argument;
 import net.minecraft.commands.arguments.coordinates.WorldCoordinate;
 import net.minecraft.commands.arguments.coordinates.WorldCoordinates;
-import net.minecraft.commands.synchronization.SuggestionProviders;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.contents.TranslatableContents;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.server.packs.resources.ResourceManager;
-import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
@@ -34,21 +27,13 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.StructureBlock;
-import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.world.level.block.entity.StructureBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.block.state.properties.StructureMode;
-import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.LevelChunk;
-import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
-import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplateManager;
 import net.minecraft.world.phys.Vec3;
 
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -118,10 +103,9 @@ public class SpawnMobsCommand {
         Player player = cs.getSource().getEntity() instanceof Player player1 ? player1 : null;
         BlockPos pos = coordinates.getBlockPos(cs.getSource());
 
-        List<EntityType<?>> types = BuiltInRegistries.ENTITY_TYPE.entrySet().stream()
+        List<? extends EntityType<?>> types = BuiltInRegistries.ENTITY_TYPE.entrySet().stream()
                 .filter(e -> namespace.equals("all") || e.getKey().location().getNamespace().equals(namespace))
-                .map(Map.Entry::getValue)
-                .collect(Collectors.toList());
+                .map(Map.Entry::getValue).toList();
 
         List<Entity> entities = types.stream().map(e -> e.create(level)).collect(Collectors.toList());
         if (livingEntitiesOnly) {
@@ -192,7 +176,7 @@ public class SpawnMobsCommand {
 
         for(int mobIndex = 1; mobIndex <= entities.size(); mobIndex++) {
             if(player != null) {
-                player.displayClientMessage(Component.translatable(" Spawning mobs"), true);
+                player.displayClientMessage(Component.literal("Spawning mobs"), true);
             }
 
             Entity entity = entities.get(mobIndex - 1);

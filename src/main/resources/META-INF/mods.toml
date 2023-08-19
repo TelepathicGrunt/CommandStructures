@@ -16,4 +16,4 @@ Spawn structures by command'''
 [[dependencies.command_structures]]
     modId="minecraft"
     mandatory=true
-    versionRange="[1.19.4,)"
+    versionRange="[1.20,)"

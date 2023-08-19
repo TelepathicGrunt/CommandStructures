@@ -3,8 +3,6 @@ package com.telepathicgrunt.commandstructures;
 import com.telepathicgrunt.commandstructures.commands.SpawnMobsCommand;
 import com.telepathicgrunt.commandstructures.commands.SpawnPiecesCommand;
 import com.telepathicgrunt.commandstructures.commands.StructureSpawnCommand;
-import net.minecraft.commands.CommandBuildContext;
-import net.minecraft.core.RegistryAccess;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.eventbus.api.IEventBus;

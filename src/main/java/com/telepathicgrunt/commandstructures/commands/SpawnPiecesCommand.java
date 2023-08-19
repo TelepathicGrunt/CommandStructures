@@ -19,14 +19,11 @@ import net.minecraft.commands.arguments.coordinates.WorldCoordinate;
 import net.minecraft.commands.arguments.coordinates.WorldCoordinates;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.contents.TranslatableContents;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.level.StructureManager;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.StructureBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -143,7 +140,7 @@ public class SpawnPiecesCommand {
         Player player = cs.getSource().getEntity() instanceof Player player1 ? player1 : null;
         BlockPos pos = coordinates.getBlockPos(cs.getSource());
 
-        List<ResourceLocation> nbtRLs = getResourceLocations(player, level, path.getNamespace(), path.getPath());
+        List<ResourceLocation> nbtRLs = getResourceLocations(level, path.getNamespace(), path.getPath());
 
         if(nbtRLs.isEmpty()) {
             String errorMsg = path + " path has no nbt pieces in it. No pieces will be placed.";
@@ -211,7 +208,7 @@ public class SpawnPiecesCommand {
 
 
 
-    private static List<ResourceLocation> getResourceLocations(Player player, ServerLevel world, String modId, String filter) {
+    private static List<ResourceLocation> getResourceLocations(ServerLevel world, String modId, String filter) {
         ResourceManager resourceManager = world.getServer().getResourceManager();
         return resourceManager.listResources("structures", (filename) -> filename.toString().endsWith(".nbt"))
                 .keySet()
@@ -228,7 +225,7 @@ public class SpawnPiecesCommand {
 
         for(int pieceIndex = 1; pieceIndex <= nbtRLs.size(); pieceIndex++) {
             if(player != null) {
-                player.displayClientMessage(Component.translatable(" Working making structure: " + nbtRLs.get(pieceIndex - 1)), true);
+                player.displayClientMessage(Component.literal("Working making structure: " + nbtRLs.get(pieceIndex - 1)), true);
             }
 
             world.setBlock(mutable, Blocks.STRUCTURE_BLOCK.defaultBlockState().setValue(StructureBlock.MODE, StructureMode.LOAD), 3);

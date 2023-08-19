@@ -1,19 +1,10 @@
 import com.modrinth.minotaur.TaskModrinthUpload
-
-buildscript {
-    repositories {
-        maven { url = 'https://maven.minecraftforge.net' }
-        mavenCentral()
-        maven { url "https://plugins.gradle.org/m2/" }
-    }
-    dependencies {
-        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '5.1.+', changing: true
-    }
-}
-
 plugins {
+    id 'eclipse'
+    id 'idea'
     id "net.darkhax.curseforgegradle" version "1.0.7"
     id "com.modrinth.minotaur" version "2.+"
+    id 'net.minecraftforge.gradle' version '[6.0,6.2)'
 }
 
 apply plugin: 'net.minecraftforge.gradle'
@@ -35,8 +26,6 @@ minecraft {
     runs {
         client {
             workingDirectory project.file('run')
-            // Recommended logging data for a userdev environment
-            property 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
 
             // Needed to make other mods with mixins be able to run in you development environment
             property 'mixin.env.remapRefMap', 'true'
@@ -47,8 +36,6 @@ minecraft {
 
         server {
             workingDirectory project.file('run')
-            // Recommended logging data for a userdev environment
-            property 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
 
             // Needed to make other mods with mixins be able to run in you development environment
             property 'mixin.env.remapRefMap', 'true'
