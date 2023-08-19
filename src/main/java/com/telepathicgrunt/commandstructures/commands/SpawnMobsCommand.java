@@ -15,11 +15,8 @@ import net.minecraft.commands.arguments.coordinates.Vec3Argument;
 import net.minecraft.commands.arguments.coordinates.WorldCoordinate;
 import net.minecraft.commands.arguments.coordinates.WorldCoordinates;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.contents.TranslatableContents;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -106,10 +103,9 @@ public class SpawnMobsCommand {
         Player player = cs.getSource().getEntity() instanceof Player player1 ? player1 : null;
         BlockPos pos = coordinates.getBlockPos(cs.getSource());
 
-        List<EntityType<?>> types = BuiltInRegistries.ENTITY_TYPE.entrySet().stream()
+        List<? extends EntityType<?>> types = BuiltInRegistries.ENTITY_TYPE.entrySet().stream()
                 .filter(e -> namespace.equals("all") || e.getKey().location().getNamespace().equals(namespace))
-                .map(Map.Entry::getValue)
-                .collect(Collectors.toList());
+                .map(Map.Entry::getValue).toList();
 
         List<Entity> entities = types.stream().map(e -> e.create(level)).collect(Collectors.toList());
         if (livingEntitiesOnly) {
@@ -180,7 +176,7 @@ public class SpawnMobsCommand {
 
         for(int mobIndex = 1; mobIndex <= entities.size(); mobIndex++) {
             if(player != null) {
-                player.displayClientMessage(Component.translatable(" Spawning mobs"), true);
+                player.displayClientMessage(Component.literal("Spawning mobs"), true);
             }
 
             Entity entity = entities.get(mobIndex - 1);
