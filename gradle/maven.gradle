@@ -1,4 +1,3 @@
-jar.finalizedBy('reobfJar')
 
 publishing {
     publications {
@@ -6,20 +5,20 @@ publishing {
             artifact jar
 
             pom {
-                name = 'CommandStructures-Forge'
+                name = 'CommandStructures-Neoforge'
                 description = 'spawn structures by command'
-                url = 'https://github.com/TelepathicGrunt/CommandStructures-Forge'
+                url = 'https://github.com/TelepathicGrunt/CommandStructures-Neoforge'
 
                 scm {
-                    connection = 'git:https://github.com/TelepathicGrunt/CommandStructures-Forge.git'
-                    developerConnection = 'git:https://github.com/TelepathicGrunt/CommandStructures-Forge.git'
-                    url = 'https://github.com/TelepathicGrunt/CommandStructures-Forge'
+                    connection = 'git:https://github.com/TelepathicGrunt/CommandStructures-Neoforge.git'
+                    developerConnection = 'git:https://github.com/TelepathicGrunt/CommandStructures-Neoforge.git'
+                    url = 'https://github.com/TelepathicGrunt/CommandStructures-Neoforge'
                 }
 
                 licenses {
                     license {
                         name = 'MIT'
-                        url = 'https://github.com/TelepathicGrunt/CommandStructures-Forge/LICENSE.txt'
+                        url = 'https://github.com/TelepathicGrunt/CommandStructures-Neoforge/LICENSE.txt'
                     }
                 }
 

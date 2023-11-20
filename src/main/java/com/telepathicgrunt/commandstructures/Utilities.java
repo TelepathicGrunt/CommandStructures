@@ -10,7 +10,7 @@ public final class Utilities {
     private Utilities() {}
 
     public static void refreshChunksOnClients(ServerLevel level) {
-        int viewDistance = level.getChunkSource().chunkMap.viewDistance;
+        int viewDistance = level.getChunkSource().chunkMap.serverViewDistance;
         level.players().forEach(player -> {
             for(int x = -viewDistance; x <= viewDistance; x++) {
                 for(int z = -viewDistance; z <= viewDistance; z++) {
@@ -18,8 +18,6 @@ public final class Utilities {
                         ChunkAccess chunkAccess = level.getChunk(new ChunkPos(player.chunkPosition().x + x, player.chunkPosition().z + z).getWorldPosition());
                         if(chunkAccess instanceof LevelChunk levelChunk) {
                             ClientboundLevelChunkWithLightPacket lightPacket = new ClientboundLevelChunkWithLightPacket(levelChunk, level.getLightEngine(), null, null);
-                            player.untrackChunk(levelChunk.getPos());
-                            player.trackChunk(levelChunk.getPos(), lightPacket);
                         }
                     }
                 }
