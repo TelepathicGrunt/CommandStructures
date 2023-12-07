@@ -4,10 +4,11 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.context.CommandContext;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import com.telepathicgrunt.commandstructures.CommandStructuresMain;
 import net.minecraft.commands.CommandBuildContext;
-import net.minecraft.commands.CommandRuntimeException;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
@@ -135,7 +136,7 @@ public class SpawnPiecesCommand {
         return rlSet;
     }
 
-    public static void spawnPieces(ResourceLocation path, Coordinates coordinates, boolean savePieces, BlockState floorBlockState, BlockState fillBlockState, int rowlength, CommandContext<CommandSourceStack> cs) {
+    public static void spawnPieces(ResourceLocation path, Coordinates coordinates, boolean savePieces, BlockState floorBlockState, BlockState fillBlockState, int rowlength, CommandContext<CommandSourceStack> cs) throws CommandSyntaxException {
         ServerLevel level = cs.getSource().getLevel();
         Player player = cs.getSource().getEntity() instanceof Player player1 ? player1 : null;
         BlockPos pos = coordinates.getBlockPos(cs.getSource());
@@ -145,7 +146,7 @@ public class SpawnPiecesCommand {
         if(nbtRLs.isEmpty()) {
             String errorMsg = path + " path has no nbt pieces in it. No pieces will be placed.";
             CommandStructuresMain.LOGGER.error(errorMsg);
-            throw new CommandRuntimeException(Component.translatable(errorMsg));
+            throw new SimpleCommandExceptionType(Component.translatable(errorMsg)).create();
         }
 
         // Size of area we will need
@@ -237,7 +238,7 @@ public class SpawnPiecesCommand {
                 structureBlockTileEntity.setIgnoreEntities(false);
 
                 fillStructureVoidSpace(world, nbtRLs.get(pieceIndex-1), mutable);
-                structureBlockTileEntity.loadStructure(world,false); // load structure
+                structureBlockTileEntity.placeStructure(world); // load structure
 
                 structureBlockTileEntity.setMode(StructureMode.SAVE);
                 if(savePieces) {

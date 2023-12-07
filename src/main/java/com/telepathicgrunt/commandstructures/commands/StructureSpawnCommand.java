@@ -5,12 +5,13 @@ import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.LongArgumentType;
 import com.mojang.brigadier.context.CommandContext;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import com.telepathicgrunt.commandstructures.CommandStructuresMain;
 import com.telepathicgrunt.commandstructures.Utilities;
 import com.telepathicgrunt.commandstructures.mixin.SinglePoolElementAccessor;
 import net.minecraft.commands.CommandBuildContext;
-import net.minecraft.commands.CommandRuntimeException;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
@@ -38,6 +39,7 @@ import net.minecraft.world.level.levelgen.structure.StructurePiece;
 import net.minecraft.world.level.levelgen.structure.pools.JigsawPlacement;
 import net.minecraft.world.level.levelgen.structure.pools.SinglePoolElement;
 import net.minecraft.world.level.levelgen.structure.pools.StructureTemplatePool;
+import net.minecraft.world.level.levelgen.structure.pools.alias.PoolAliasLookup;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureProcessorList;
 
 import java.util.List;
@@ -104,7 +106,7 @@ public class StructureSpawnCommand {
         return cs.getSource().getLevel().registryAccess().registryOrThrow(Registries.TEMPLATE_POOL).keySet();
     }
 
-    private static void generateStructure(Coordinates coordinates, ResourceLocation structureStartPoolRL, int depth, boolean heightmapSnap, boolean legacyBoundingBoxRule, boolean disableProcessors, boolean sendChunkLightingPacket, Long randomSeed, CommandContext<CommandSourceStack> cs) {
+    private static void generateStructure(Coordinates coordinates, ResourceLocation structureStartPoolRL, int depth, boolean heightmapSnap, boolean legacyBoundingBoxRule, boolean disableProcessors, boolean sendChunkLightingPacket, Long randomSeed, CommandContext<CommandSourceStack> cs) throws CommandSyntaxException {
         ServerLevel level = cs.getSource().getLevel();
         BlockPos centerPos = coordinates.getBlockPos(cs.getSource());
         if(heightmapSnap) centerPos = centerPos.below(centerPos.getY()); //not a typo. Needed so heightmap is not offset by player height.
@@ -114,7 +116,7 @@ public class StructureSpawnCommand {
         if(templatePool == null || templatePool.size() == 0) {
             String errorMsg = structureStartPoolRL + " template pool does not exist or is empty";
             CommandStructuresMain.LOGGER.error(errorMsg);
-            throw new CommandRuntimeException(Component.translatable(errorMsg));
+            throw new SimpleCommandExceptionType(Component.translatable(errorMsg)).create();
         }
 
         long finalSeed = randomSeed == null ? level.getSeed() : randomSeed;
@@ -139,7 +141,8 @@ public class StructureSpawnCommand {
                 centerPos,
                 legacyBoundingBoxRule,
                 heightmapSnap ? Optional.of(Heightmap.Types.WORLD_SURFACE_WG) : Optional.empty(),
-                80);
+                80,
+                PoolAliasLookup.EMPTY);
 
         if(pieceGenerator.isPresent()) {
             WorldgenRandom worldgenrandom;
@@ -182,13 +185,13 @@ public class StructureSpawnCommand {
             else {
                 String errorMsg = structureStartPoolRL + " Template Pool spawned no pieces.";
                 CommandStructuresMain.LOGGER.error(errorMsg);
-                throw new CommandRuntimeException(Component.translatable(errorMsg));
+                throw new SimpleCommandExceptionType(Component.translatable(errorMsg)).create();
             }
         }
         else {
             String errorMsg = structureStartPoolRL + " Template Pool spawned no pieces.";
             CommandStructuresMain.LOGGER.error(errorMsg);
-            throw new CommandRuntimeException(Component.translatable(errorMsg));
+            throw new SimpleCommandExceptionType(Component.translatable(errorMsg)).create();
         }
     }
 

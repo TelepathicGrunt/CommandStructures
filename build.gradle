@@ -66,6 +66,8 @@ task publishCurseForge(type: net.darkhax.curseforgegradle.TaskPublishCurseForge)
 	mainFile.changelogType = "markdown"
 	mainFile.releaseType = "release"
 	mainFile.displayName = "CommandStructures-Fabric v${project.mod_version} (${project.minecraft_version} MC)"
+	mainFile.addGameVersion("${project.minecraft_version}")
+	mainFile.addGameVersion("Fabric")
 }
 
 modrinth {
