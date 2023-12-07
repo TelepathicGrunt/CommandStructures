@@ -63,6 +63,7 @@ task publishCurseForge(type: net.darkhax.curseforgegradle.TaskPublishCurseForge)
     mainFile.releaseType = "release"
     mainFile.displayName = "CommandStructures-Neoforge v${project.mod_version} (${project.mc_version} MC)"
     mainFile.addGameVersion("${project.mc_version}")
+    mainFile.addGameVersion("NeoForge")
 }
 
 modrinth {
