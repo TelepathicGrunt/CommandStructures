@@ -15,5 +15,5 @@ Spawn structures by command'''
 # makes sure our mod does not be attempted to be ran on older version of Minecraft and explodes
 [[dependencies.command_structures]]
     modId="minecraft"
-    mandatory=true
+    type="required"
     versionRange="[1.20.3,)"
