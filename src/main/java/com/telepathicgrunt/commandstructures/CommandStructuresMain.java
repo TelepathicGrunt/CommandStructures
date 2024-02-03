@@ -1,5 +1,6 @@
 package com.telepathicgrunt.commandstructures;
 
+import com.telepathicgrunt.commandstructures.commands.FillStructureVoidCommand;
 import com.telepathicgrunt.commandstructures.commands.SpawnMobsCommand;
 import com.telepathicgrunt.commandstructures.commands.SpawnPiecesCommand;
 import com.telepathicgrunt.commandstructures.commands.StructureSpawnCommand;
@@ -34,5 +35,6 @@ public class CommandStructuresMain {
         StructureSpawnCommand.createCommand(event.getDispatcher(), event.getBuildContext());
         SpawnPiecesCommand.createCommand(event.getDispatcher(), event.getBuildContext());
         SpawnMobsCommand.createCommand(event.getDispatcher(), event.getBuildContext());
+        FillStructureVoidCommand.createCommand(event.getDispatcher(), event.getBuildContext());
     }
 }
