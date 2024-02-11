@@ -22,6 +22,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerChunkCache;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.world.entity.player.Player;
@@ -54,6 +55,7 @@ public class SpawnPiecesCommand {
         String floorblockArg = "floorblock";
         String fillerblockArg = "fillerblock";
         String rowlengthArg = "rowlength";
+        String spacingArg = "spacing";
 
         LiteralCommandNode<CommandSourceStack> source = dispatcher.register(Commands.literal(commandString)
                 .requires((permission) -> permission.hasPermission(2))
@@ -65,35 +67,40 @@ public class SpawnPiecesCommand {
                             new WorldCoordinate(false, cs.getSource().getPosition().y()),
                             new WorldCoordinate(false, cs.getSource().getPosition().z())
                     );
-                    spawnPieces(cs.getArgument(rlArg, ResourceLocation.class), worldCoordinates, false, Blocks.BARRIER.defaultBlockState(), Blocks.AIR.defaultBlockState(), 13, cs);
+                    spawnPieces(cs.getArgument(rlArg, ResourceLocation.class), worldCoordinates, false, Blocks.BARRIER.defaultBlockState(), Blocks.AIR.defaultBlockState(), 13, 48, cs);
                     return 1;
                 })
                 .then(Commands.argument(locationArg, Vec3Argument.vec3())
                 .executes(cs -> {
-                    spawnPieces(cs.getArgument(rlArg, ResourceLocation.class), Vec3Argument.getCoordinates(cs, locationArg), false, Blocks.BARRIER.defaultBlockState(), Blocks.AIR.defaultBlockState(), 13, cs);
+                    spawnPieces(cs.getArgument(rlArg, ResourceLocation.class), Vec3Argument.getCoordinates(cs, locationArg), false, Blocks.BARRIER.defaultBlockState(), Blocks.AIR.defaultBlockState(), 13, 48, cs);
                     return 1;
                 })
                 .then(Commands.argument(savepieceArg, BoolArgumentType.bool())
                 .executes(cs -> {
-                    spawnPieces(cs.getArgument(rlArg, ResourceLocation.class), Vec3Argument.getCoordinates(cs, locationArg), cs.getArgument(savepieceArg, boolean.class), Blocks.BARRIER.defaultBlockState(), Blocks.AIR.defaultBlockState(), 13, cs);
+                    spawnPieces(cs.getArgument(rlArg, ResourceLocation.class), Vec3Argument.getCoordinates(cs, locationArg), cs.getArgument(savepieceArg, boolean.class), Blocks.BARRIER.defaultBlockState(), Blocks.AIR.defaultBlockState(), 13, 48, cs);
                     return 1;
                 })
                 .then(Commands.argument(floorblockArg, BlockStateArgument.block(buildContext))
                 .executes(cs -> {
-                    spawnPieces(cs.getArgument(rlArg, ResourceLocation.class), Vec3Argument.getCoordinates(cs, locationArg), cs.getArgument(savepieceArg, boolean.class), BlockStateArgument.getBlock(cs, floorblockArg).getState(), Blocks.AIR.defaultBlockState(), 13, cs);
+                    spawnPieces(cs.getArgument(rlArg, ResourceLocation.class), Vec3Argument.getCoordinates(cs, locationArg), cs.getArgument(savepieceArg, boolean.class), BlockStateArgument.getBlock(cs, floorblockArg).getState(), Blocks.AIR.defaultBlockState(), 13, 48, cs);
                     return 1;
                 })
                 .then(Commands.argument(fillerblockArg, BlockStateArgument.block(buildContext))
                 .executes(cs -> {
-                    spawnPieces(cs.getArgument(rlArg, ResourceLocation.class), Vec3Argument.getCoordinates(cs, locationArg), cs.getArgument(savepieceArg, boolean.class), BlockStateArgument.getBlock(cs, floorblockArg).getState(), BlockStateArgument.getBlock(cs, fillerblockArg).getState(), 13, cs);
+                    spawnPieces(cs.getArgument(rlArg, ResourceLocation.class), Vec3Argument.getCoordinates(cs, locationArg), cs.getArgument(savepieceArg, boolean.class), BlockStateArgument.getBlock(cs, floorblockArg).getState(), BlockStateArgument.getBlock(cs, fillerblockArg).getState(), 13, 48, cs);
                     return 1;
                 })
                 .then(Commands.argument(rowlengthArg, IntegerArgumentType.integer())
                 .executes(cs -> {
-                    spawnPieces(cs.getArgument(rlArg, ResourceLocation.class), Vec3Argument.getCoordinates(cs, locationArg), cs.getArgument(savepieceArg, boolean.class), BlockStateArgument.getBlock(cs, floorblockArg).getState(), BlockStateArgument.getBlock(cs, fillerblockArg).getState(), cs.getArgument(rowlengthArg, Integer.class), cs);
+                    spawnPieces(cs.getArgument(rlArg, ResourceLocation.class), Vec3Argument.getCoordinates(cs, locationArg), cs.getArgument(savepieceArg, boolean.class), BlockStateArgument.getBlock(cs, floorblockArg).getState(), BlockStateArgument.getBlock(cs, fillerblockArg).getState(), cs.getArgument(rowlengthArg, Integer.class), 48, cs);
                     return 1;
                 })
-        )))))));
+                .then(Commands.argument(spacingArg, IntegerArgumentType.integer())
+                .executes(cs -> {
+                    spawnPieces(cs.getArgument(rlArg, ResourceLocation.class), Vec3Argument.getCoordinates(cs, locationArg), cs.getArgument(savepieceArg, boolean.class), BlockStateArgument.getBlock(cs, floorblockArg).getState(), BlockStateArgument.getBlock(cs, fillerblockArg).getState(), cs.getArgument(rowlengthArg, Integer.class), cs.getArgument(spacingArg, Integer.class), cs);
+                    return 1;
+                })
+        ))))))));
 
         dispatcher.register(Commands.literal(commandString).redirect(source));
     }
@@ -136,7 +143,7 @@ public class SpawnPiecesCommand {
         return rlSet;
     }
 
-    public static void spawnPieces(ResourceLocation path, Coordinates coordinates, boolean savePieces, BlockState floorBlockState, BlockState fillBlockState, int rowlength, CommandContext<CommandSourceStack> cs) throws CommandSyntaxException {
+    public static void spawnPieces(ResourceLocation path, Coordinates coordinates, boolean savePieces, BlockState floorBlockState, BlockState fillBlockState, int rowlength, int spacing, CommandContext<CommandSourceStack> cs) throws CommandSyntaxException {
         ServerLevel level = cs.getSource().getLevel();
         Player player = cs.getSource().getEntity() instanceof Player player1 ? player1 : null;
         BlockPos pos = coordinates.getBlockPos(cs.getSource());
@@ -156,54 +163,68 @@ public class SpawnPiecesCommand {
             columnCount = nbtRLs.size();
         }
 
-        int spacing = 48;
         BlockPos bounds = new BlockPos((spacing * rowCount) + 16, spacing, spacing * columnCount);
 
         // Fill/clear area with structure void
-        clearAreaNew(level, pos, player, bounds, fillBlockState, floorBlockState);
+        clearAreaNew(level, pos, player, bounds, fillBlockState, floorBlockState, spacing);
         generateStructurePieces(level, pos, player, nbtRLs, columnCount, spacing, savePieces);
     }
 
-    private static void clearAreaNew(ServerLevel world, BlockPos pos, Player player, BlockPos bounds, BlockState fillBlock, BlockState floorBlock) {
+    private static void clearAreaNew(ServerLevel world, BlockPos pos, Player player, BlockPos bounds, BlockState fillBlock, BlockState floorBlock, int spacing) {
         BlockPos.MutableBlockPos mutableChunk = new BlockPos.MutableBlockPos().set(pos.getX() >> 4, pos.getY(), pos.getZ() >> 4);
+        BlockPos.MutableBlockPos mutablePos = new BlockPos.MutableBlockPos();
+
         mutableChunk.move(1,0,0);
         int endChunkX = (pos.getX() + bounds.getX()) >> 4;
         int endChunkZ = (pos.getZ() + bounds.getZ()) >> 4;
 
         int maxChunks = (endChunkX - mutableChunk.getX()) * (endChunkZ - mutableChunk.getZ());
         int currentSection = 0;
-        for(; mutableChunk.getX() < endChunkX; mutableChunk.move(1,0,0)) {
-            for (; mutableChunk.getZ() < endChunkZ; mutableChunk.move(0, 0, 1)) {
-                LevelChunk chunk = world.getChunk(mutableChunk.getX(), mutableChunk.getZ());
-                BlockPos.MutableBlockPos mutable = new BlockPos(mutableChunk.getX() << 4, pos.getY(), mutableChunk.getZ() << 4).mutable();
-                mutable.move(-1, 0, 0);
-                for(int x = 0; x < 16; x++) {
-                    mutable.setZ(mutableChunk.getZ() << 4);
-                    mutable.move(1, 0, -1);
-                    for(int z = 0; z < 16; z++) {
-                        mutable.move(0, 0, 1);
-                        mutable.setY(pos.getY());
-                        BlockState oldState = chunk.setBlockState(mutable, floorBlock, false);
-                        if(oldState != null) {
-                            world.getChunkSource().blockChanged(mutable);
-                            world.getChunkSource().getLightEngine().checkBlock(mutable);
+
+        int minY = pos.getY() + 1;
+        int maxY = pos.getY() + spacing + 1;
+
+        ServerChunkCache chunkSource = world.getChunkSource();
+
+        while (mutableChunk.getX() < endChunkX) {
+            while (mutableChunk.getZ() < endChunkZ) {
+                mutablePos.set(mutableChunk.getX() << 4, pos.getY(), mutableChunk.getZ() << 4);
+                mutablePos.move(-1, 0, 0);
+
+                ChunkAccess chunkAccess = world.getChunk(mutableChunk.getX(), mutableChunk.getZ());
+                for (int x = 0; x < 16; x++) {
+                    mutablePos.setZ(mutableChunk.getZ() << 4);
+                    mutablePos.move(1, 0, -1);
+
+                    for (int z = 0; z < 16; z++) {
+                        mutablePos.move(0, 0, 1);
+                        mutablePos.setY(pos.getY());
+                        BlockState oldState = chunkAccess.setBlockState(mutablePos, floorBlock, false);
+
+                        if (oldState != null) {
+                            chunkSource.blockChanged(mutablePos);
                         }
-                        for(int y = pos.getY() + 1; y < pos.getY() + 64; y++) {
-                            mutable.setY(y);
-                            oldState = chunk.setBlockState(mutable, fillBlock, false);
-                            if(oldState != null) {
-                                world.getChunkSource().blockChanged(mutable);
-                                world.getChunkSource().getLightEngine().checkBlock(mutable);
+
+                        for (int y = minY; y < maxY; y++) {
+                            mutablePos.setY(y);
+                            oldState = chunkAccess.setBlockState(mutablePos, fillBlock, false);
+
+                            if (oldState != null) {
+                                chunkSource.blockChanged(mutablePos);
                             }
                         }
                     }
                 }
+
                 currentSection++;
                 if(player != null) {
                     player.displayClientMessage(Component.translatable("Working: %" +  Math.round(((float)currentSection / maxChunks) * 100f)), true);
                 }
+
+                mutableChunk.move(0, 0, 1);
             }
             mutableChunk.set(mutableChunk.getX(), mutableChunk.getY(), pos.getZ() >> 4); // Set back to start of row
+            mutableChunk.move(1,0,0);
         }
     }
 
@@ -275,7 +296,6 @@ public class SpawnPiecesCommand {
                         BlockState oldState = chunk.setBlockState(mutable, Blocks.STRUCTURE_VOID.defaultBlockState(), false);
                         if(oldState != null) {
                             world.getChunkSource().blockChanged(mutable);
-                            world.getChunkSource().getLightEngine().checkBlock(mutable);
                         }
                     }
                 }
