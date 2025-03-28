@@ -7,8 +7,14 @@ import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.LevelChunk;
 
+import java.util.ServiceLoader;
+
 public final class Utilities {
     private Utilities() {}
+
+    public static <T> T loadService(Class<T> service) {
+        return ServiceLoader.load(service).findFirst().orElseThrow(() -> new IllegalStateException("No platform implementation found for " + service.getName()));
+    }
 
     public static void refreshChunksOnClients(ServerLevel level) {
         int viewDistance = ((ChunkMapAccessor)level.getChunkSource().chunkMap).getServerViewDistance();

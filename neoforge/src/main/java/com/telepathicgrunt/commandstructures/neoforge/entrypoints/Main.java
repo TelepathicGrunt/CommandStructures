@@ -1,4 +1,4 @@
-package com.telepathicgrunt.commandstructures.neoforge;
+package com.telepathicgrunt.commandstructures.neoforge.entrypoints;
 
 import com.telepathicgrunt.commandstructures.CommandStructuresMain;
 import com.telepathicgrunt.commandstructures.commands.FillStructureVoidCommand;
@@ -9,17 +9,15 @@ import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 @Mod(CommandStructuresMain.MODID)
-public class CommandStructuresNeoForge {
+public class Main {
 
-    public CommandStructuresNeoForge() {
+    public Main() {
+        CommandStructuresMain.CommandStructuresInit();
+
         IEventBus forgeBus = NeoForge.EVENT_BUS;
         forgeBus.addListener(this::registerCommand);
-
-        CommandStructuresMain.CommandStructuresInit();
     }
 
     private void registerCommand(RegisterCommandsEvent event) {

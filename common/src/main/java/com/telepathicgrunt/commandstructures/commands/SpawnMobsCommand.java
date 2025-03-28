@@ -6,6 +6,7 @@ import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.tree.LiteralCommandNode;
+import net.minecraft.SharedConstants;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -27,6 +28,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.LevelChunk;
@@ -147,14 +149,14 @@ public class SpawnMobsCommand {
                     for(int z = 0; z < 16; z++) {
                         mutable.move(0, 0, 1);
                         mutable.setY(pos.getY());
-                        BlockState oldState = chunk.setBlockState(mutable, floorBlock, false);
+                        BlockState oldState = chunk.setBlockState(mutable, floorBlock, Block.UPDATE_CLIENTS);
                         if(oldState != null) {
                             world.getChunkSource().blockChanged(mutable);
                             world.getChunkSource().getLightEngine().checkBlock(mutable);
                         }
                         for(int y = pos.getY() + 1; y < pos.getY() + 64; y++) {
                             mutable.setY(y);
-                            oldState = chunk.setBlockState(mutable, fillBlock, false);
+                            oldState = chunk.setBlockState(mutable, fillBlock, Block.UPDATE_CLIENTS);
                             if(oldState != null) {
                                 world.getChunkSource().blockChanged(mutable);
                                 world.getChunkSource().getLightEngine().checkBlock(mutable);
@@ -191,7 +193,7 @@ public class SpawnMobsCommand {
                     mob.setNoAi(true);
                     mob.setSpeed(0);
                     mob.addEffect(new MobEffectInstance(
-                        MobEffects.MOVEMENT_SLOWDOWN,
+                        MobEffects.SLOWNESS,
                         99999999,
                         255,
                         true,

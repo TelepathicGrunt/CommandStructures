@@ -26,6 +26,7 @@ import net.minecraft.server.level.ServerChunkCache;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.StructureBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -210,7 +211,7 @@ public class SpawnPiecesCommand {
                     for (int z = 0; z < 16; z++) {
                         mutablePos.move(0, 0, 1);
                         mutablePos.setY(pos.getY());
-                        BlockState oldState = chunkAccess.setBlockState(mutablePos, floorBlock, false);
+                        BlockState oldState = chunkAccess.setBlockState(mutablePos, floorBlock, Block.UPDATE_CLIENTS);
 
                         if (oldState != null) {
                             chunkSource.blockChanged(mutablePos);
@@ -218,7 +219,7 @@ public class SpawnPiecesCommand {
 
                         for (int y = minY; y < maxY; y++) {
                             mutablePos.setY(y);
-                            oldState = chunkAccess.setBlockState(mutablePos, fillBlock, false);
+                            oldState = chunkAccess.setBlockState(mutablePos, fillBlock, Block.UPDATE_CLIENTS);
 
                             if (oldState != null) {
                                 chunkSource.blockChanged(mutablePos);
@@ -304,7 +305,7 @@ public class SpawnPiecesCommand {
                             chunk = world.getChunk(mutable);
                         }
 
-                        BlockState oldState = chunk.setBlockState(mutable, Blocks.STRUCTURE_VOID.defaultBlockState(), false);
+                        BlockState oldState = chunk.setBlockState(mutable, Blocks.STRUCTURE_VOID.defaultBlockState(), Block.UPDATE_CLIENTS);
                         if(oldState != null) {
                             world.getChunkSource().blockChanged(mutable);
                         }
