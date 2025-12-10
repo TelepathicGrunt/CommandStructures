@@ -30,7 +30,7 @@ public class FillStructureVoidCommand {
         String sizeArg = "radius";
 
         LiteralCommandNode<CommandSourceStack> source = dispatcher.register(Commands.literal(commandString)
-                .requires((permission) -> permission.hasPermission(2))
+                .requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
                 .then(Commands.argument(sizeArg, IntegerArgumentType.integer())
                 .executes(cs -> {
                     WorldCoordinates worldCoordinates = new WorldCoordinates(

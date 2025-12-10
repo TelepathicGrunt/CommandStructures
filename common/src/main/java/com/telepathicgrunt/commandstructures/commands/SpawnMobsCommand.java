@@ -52,7 +52,7 @@ public class SpawnMobsCommand {
         String livingentitiesArg = "livingentities";
 
         LiteralCommandNode<CommandSourceStack> source = dispatcher.register(Commands.literal(commandString)
-                .requires((permission) -> permission.hasPermission(2))
+                .requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
                 .then(Commands.argument(rlArg, StringArgumentType.string())
                 .suggests((ctx, sb) -> SharedSuggestionProvider.suggest(namespaceSuggestions(ctx), sb))
                 .executes(cs -> {
@@ -92,7 +92,7 @@ public class SpawnMobsCommand {
         Set<String> modidStrings = new HashSet<>();
         BuiltInRegistries.ENTITY_TYPE.entrySet().forEach((entry) -> {
             if (entry.getValue().canSummon()) {
-                modidStrings.add(entry.getKey().location().getNamespace());
+                modidStrings.add(entry.getKey().identifier().getNamespace());
             }
         });
 
@@ -107,7 +107,7 @@ public class SpawnMobsCommand {
         BlockPos pos = coordinates.getBlockPos(cs.getSource());
 
         List<? extends EntityType<?>> types = BuiltInRegistries.ENTITY_TYPE.entrySet().stream()
-                .filter(e -> namespace.equals("all") || e.getKey().location().getNamespace().equals(namespace))
+                .filter(e -> namespace.equals("all") || e.getKey().identifier().getNamespace().equals(namespace))
                 .map(Map.Entry::getValue).toList();
 
         List<Entity> entities = types.stream().map(e -> e.create(level, EntitySpawnReason.COMMAND)).collect(Collectors.toList());

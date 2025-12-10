@@ -12,7 +12,7 @@ import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
-import net.minecraft.commands.arguments.ResourceLocationArgument;
+import net.minecraft.commands.arguments.IdentifierArgument;
 import net.minecraft.commands.arguments.blocks.BlockStateArgument;
 import net.minecraft.commands.arguments.coordinates.Coordinates;
 import net.minecraft.commands.arguments.coordinates.Vec3Argument;
@@ -20,7 +20,8 @@ import net.minecraft.commands.arguments.coordinates.WorldCoordinate;
 import net.minecraft.commands.arguments.coordinates.WorldCoordinates;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerChunkCache;
 import net.minecraft.server.level.ServerLevel;
@@ -46,7 +47,7 @@ import java.util.stream.Collectors;
 
 public class SpawnPiecesCommand {
     private static MinecraftServer currentMinecraftServer = null;
-    private static Set<ResourceLocation> cachedSuggestion = new HashSet<>();
+    private static Set<Identifier> cachedSuggestion = new HashSet<>();
 
     public static void createCommand(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext buildContext) {
         String commandString = "spawnpieces";
@@ -59,8 +60,8 @@ public class SpawnPiecesCommand {
         String spacingArg = "spacing";
 
         LiteralCommandNode<CommandSourceStack> source = dispatcher.register(Commands.literal(commandString)
-                .requires((permission) -> permission.hasPermission(2))
-                .then(Commands.argument(rlArg, ResourceLocationArgument.id())
+                .requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
+                .then(Commands.argument(rlArg, IdentifierArgument.id())
                 .suggests((ctx, sb) -> SharedSuggestionProvider.suggestResource(templatePathsSuggestions(ctx), sb))
                 .executes(cs -> {
                     WorldCoordinates worldCoordinates = new WorldCoordinates(
@@ -68,37 +69,37 @@ public class SpawnPiecesCommand {
                             new WorldCoordinate(false, cs.getSource().getPosition().y()),
                             new WorldCoordinate(false, cs.getSource().getPosition().z())
                     );
-                    spawnPieces(cs.getArgument(rlArg, ResourceLocation.class), worldCoordinates, false, Blocks.BARRIER.defaultBlockState(), Blocks.AIR.defaultBlockState(), 13, -1, cs);
+                    spawnPieces(cs.getArgument(rlArg, Identifier.class), worldCoordinates, false, Blocks.BARRIER.defaultBlockState(), Blocks.AIR.defaultBlockState(), 13, -1, cs);
                     return 1;
                 })
                 .then(Commands.argument(locationArg, Vec3Argument.vec3())
                 .executes(cs -> {
-                    spawnPieces(cs.getArgument(rlArg, ResourceLocation.class), Vec3Argument.getCoordinates(cs, locationArg), false, Blocks.BARRIER.defaultBlockState(), Blocks.AIR.defaultBlockState(), 13, -1, cs);
+                    spawnPieces(cs.getArgument(rlArg, Identifier.class), Vec3Argument.getCoordinates(cs, locationArg), false, Blocks.BARRIER.defaultBlockState(), Blocks.AIR.defaultBlockState(), 13, -1, cs);
                     return 1;
                 })
                 .then(Commands.argument(savepieceArg, BoolArgumentType.bool())
                 .executes(cs -> {
-                    spawnPieces(cs.getArgument(rlArg, ResourceLocation.class), Vec3Argument.getCoordinates(cs, locationArg), cs.getArgument(savepieceArg, boolean.class), Blocks.BARRIER.defaultBlockState(), Blocks.AIR.defaultBlockState(), 13, -1, cs);
+                    spawnPieces(cs.getArgument(rlArg, Identifier.class), Vec3Argument.getCoordinates(cs, locationArg), cs.getArgument(savepieceArg, boolean.class), Blocks.BARRIER.defaultBlockState(), Blocks.AIR.defaultBlockState(), 13, -1, cs);
                     return 1;
                 })
                 .then(Commands.argument(floorblockArg, BlockStateArgument.block(buildContext))
                 .executes(cs -> {
-                    spawnPieces(cs.getArgument(rlArg, ResourceLocation.class), Vec3Argument.getCoordinates(cs, locationArg), cs.getArgument(savepieceArg, boolean.class), BlockStateArgument.getBlock(cs, floorblockArg).getState(), Blocks.AIR.defaultBlockState(), 13, -1, cs);
+                    spawnPieces(cs.getArgument(rlArg, Identifier.class), Vec3Argument.getCoordinates(cs, locationArg), cs.getArgument(savepieceArg, boolean.class), BlockStateArgument.getBlock(cs, floorblockArg).getState(), Blocks.AIR.defaultBlockState(), 13, -1, cs);
                     return 1;
                 })
                 .then(Commands.argument(fillerblockArg, BlockStateArgument.block(buildContext))
                 .executes(cs -> {
-                    spawnPieces(cs.getArgument(rlArg, ResourceLocation.class), Vec3Argument.getCoordinates(cs, locationArg), cs.getArgument(savepieceArg, boolean.class), BlockStateArgument.getBlock(cs, floorblockArg).getState(), BlockStateArgument.getBlock(cs, fillerblockArg).getState(), 13, -1, cs);
+                    spawnPieces(cs.getArgument(rlArg, Identifier.class), Vec3Argument.getCoordinates(cs, locationArg), cs.getArgument(savepieceArg, boolean.class), BlockStateArgument.getBlock(cs, floorblockArg).getState(), BlockStateArgument.getBlock(cs, fillerblockArg).getState(), 13, -1, cs);
                     return 1;
                 })
                 .then(Commands.argument(rowlengthArg, IntegerArgumentType.integer())
                 .executes(cs -> {
-                    spawnPieces(cs.getArgument(rlArg, ResourceLocation.class), Vec3Argument.getCoordinates(cs, locationArg), cs.getArgument(savepieceArg, boolean.class), BlockStateArgument.getBlock(cs, floorblockArg).getState(), BlockStateArgument.getBlock(cs, fillerblockArg).getState(), cs.getArgument(rowlengthArg, Integer.class), -1, cs);
+                    spawnPieces(cs.getArgument(rlArg, Identifier.class), Vec3Argument.getCoordinates(cs, locationArg), cs.getArgument(savepieceArg, boolean.class), BlockStateArgument.getBlock(cs, floorblockArg).getState(), BlockStateArgument.getBlock(cs, fillerblockArg).getState(), cs.getArgument(rowlengthArg, Integer.class), -1, cs);
                     return 1;
                 })
                 .then(Commands.argument(spacingArg, IntegerArgumentType.integer())
                 .executes(cs -> {
-                    spawnPieces(cs.getArgument(rlArg, ResourceLocation.class), Vec3Argument.getCoordinates(cs, locationArg), cs.getArgument(savepieceArg, boolean.class), BlockStateArgument.getBlock(cs, floorblockArg).getState(), BlockStateArgument.getBlock(cs, fillerblockArg).getState(), cs.getArgument(rowlengthArg, Integer.class), cs.getArgument(spacingArg, Integer.class), cs);
+                    spawnPieces(cs.getArgument(rlArg, Identifier.class), Vec3Argument.getCoordinates(cs, locationArg), cs.getArgument(savepieceArg, boolean.class), BlockStateArgument.getBlock(cs, floorblockArg).getState(), BlockStateArgument.getBlock(cs, fillerblockArg).getState(), cs.getArgument(rowlengthArg, Integer.class), cs.getArgument(spacingArg, Integer.class), cs);
                     return 1;
                 })
         ))))))));
@@ -106,14 +107,14 @@ public class SpawnPiecesCommand {
         dispatcher.register(Commands.literal(commandString).redirect(source));
     }
 
-    private static Set<ResourceLocation> templatePathsSuggestions(CommandContext<CommandSourceStack> cs) {
+    private static Set<Identifier> templatePathsSuggestions(CommandContext<CommandSourceStack> cs) {
         if(currentMinecraftServer == cs.getSource().getServer()) {
             return cachedSuggestion;
         }
 
         ResourceManager resourceManager = cs.getSource().getLevel().getServer().getResourceManager();
         Set<String> modidStrings = new HashSet<>();
-        Set<ResourceLocation> rlSet = resourceManager.listResources("structure", (filename) -> filename.toString().endsWith(".nbt"))
+        Set<Identifier> rlSet = resourceManager.listResources("structure", (filename) -> filename.toString().endsWith(".nbt"))
                 .keySet()
                 .stream()
                 .map(resourceLocation -> {
@@ -130,13 +131,13 @@ public class SpawnPiecesCommand {
                         path = path.substring(0, i) + "/";
                     }
 
-                    return ResourceLocation.fromNamespaceAndPath(namespace, path);
+                    return Identifier.fromNamespaceAndPath(namespace, path);
                 })
                 .collect(Collectors.toSet());
 
         // add suggestion for entire mods/vanilla too
         rlSet.addAll(modidStrings.stream()
-                .map(modid -> ResourceLocation.fromNamespaceAndPath(modid, ""))
+                .map(modid -> Identifier.fromNamespaceAndPath(modid, ""))
                 .collect(Collectors.toSet()));
 
         currentMinecraftServer = cs.getSource().getServer();
@@ -144,12 +145,12 @@ public class SpawnPiecesCommand {
         return rlSet;
     }
 
-    public static void spawnPieces(ResourceLocation path, Coordinates coordinates, boolean savePieces, BlockState floorBlockState, BlockState fillBlockState, int rowlength, int spacing, CommandContext<CommandSourceStack> cs) throws CommandSyntaxException {
+    public static void spawnPieces(Identifier path, Coordinates coordinates, boolean savePieces, BlockState floorBlockState, BlockState fillBlockState, int rowlength, int spacing, CommandContext<CommandSourceStack> cs) throws CommandSyntaxException {
         ServerLevel level = cs.getSource().getLevel();
         Player player = cs.getSource().getEntity() instanceof Player player1 ? player1 : null;
         BlockPos pos = coordinates.getBlockPos(cs.getSource());
 
-        List<ResourceLocation> nbtRLs = getResourceLocations(level, path.getNamespace(), path.getPath());
+        List<Identifier> nbtRLs = getIdentifiers(level, path.getNamespace(), path.getPath());
 
         if(nbtRLs.isEmpty()) {
             String errorMsg = path + " path has no nbt pieces in it. No pieces will be placed.";
@@ -158,7 +159,7 @@ public class SpawnPiecesCommand {
         }
 
         if (spacing <= -1) {
-            for (ResourceLocation nbtRL : nbtRLs) {
+            for (Identifier nbtRL : nbtRLs) {
                 Optional<StructureTemplate> optionalStructureTemplate = level.getServer().getStructureManager().get(nbtRL);
                 if (optionalStructureTemplate.isPresent()) {
                     StructureTemplate structureTemplate = optionalStructureTemplate.get();
@@ -242,19 +243,19 @@ public class SpawnPiecesCommand {
 
 
 
-    private static List<ResourceLocation> getResourceLocations(ServerLevel world, String modId, String filter) {
+    private static List<Identifier> getIdentifiers(ServerLevel world, String modId, String filter) {
         ResourceManager resourceManager = world.getServer().getResourceManager();
         return resourceManager.listResources("structure", (filename) -> filename.toString().endsWith(".nbt"))
                 .keySet()
                 .stream()
                 .filter(resourceLocation -> resourceLocation.getNamespace().equals(modId))
                 .filter(resourceLocation -> resourceLocation.getPath().startsWith("structure/" + filter))
-                .map(resourceLocation -> ResourceLocation.fromNamespaceAndPath(resourceLocation.getNamespace(), resourceLocation.getPath().replaceAll("^structure/", "").replaceAll(".nbt$", "")))
+                .map(resourceLocation -> Identifier.fromNamespaceAndPath(resourceLocation.getNamespace(), resourceLocation.getPath().replaceAll("^structure/", "").replaceAll(".nbt$", "")))
                 .toList();
     }
 
 
-    private static void generateStructurePieces(ServerLevel world, BlockPos pos, Player player, List<ResourceLocation> nbtRLs, int columnCount, int spacing, boolean savePieces) {
+    private static void generateStructurePieces(ServerLevel world, BlockPos pos, Player player, List<Identifier> nbtRLs, int columnCount, int spacing, boolean savePieces) {
         BlockPos.MutableBlockPos mutable = new BlockPos.MutableBlockPos().set(((pos.getX() >> 4) + 1) << 4, pos.getY(), (pos.getZ() >> 4) << 4);
 
         for(int pieceIndex = 1; pieceIndex <= nbtRLs.size(); pieceIndex++) {
@@ -291,7 +292,7 @@ public class SpawnPiecesCommand {
     }
 
     // Needed so that structure void is preserved in structure pieces.
-    private static void fillStructureVoidSpace(ServerLevel world, ResourceLocation resourceLocation, BlockPos startSpot) {
+    private static void fillStructureVoidSpace(ServerLevel world, Identifier resourceLocation, BlockPos startSpot) {
         StructureTemplateManager structuremanager = world.getStructureManager();
         Optional<StructureTemplate> optional = structuremanager.get(resourceLocation);
         optional.ifPresent(template -> {
