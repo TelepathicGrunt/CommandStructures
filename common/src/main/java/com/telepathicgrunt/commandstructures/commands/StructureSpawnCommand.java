@@ -123,7 +123,7 @@ public class StructureSpawnCommand {
         }
 
         long finalSeed = randomSeed == null ? level.getSeed() : randomSeed;
-        ChunkPos chunkPos = randomSeed == null ? new ChunkPos(centerPos) : new ChunkPos(0, 0);
+        ChunkPos chunkPos = randomSeed == null ? ChunkPos.containing(centerPos) : new ChunkPos(0, 0);
         Structure.GenerationContext newGenerationContext = new Structure.GenerationContext(
                 level.registryAccess(),
                 level.getChunkSource().getGenerator(),

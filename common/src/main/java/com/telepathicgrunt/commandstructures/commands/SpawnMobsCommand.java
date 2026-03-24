@@ -166,7 +166,7 @@ public class SpawnMobsCommand {
                 }
                 currentSection++;
                 if(player != null) {
-                    player.displayClientMessage(Component.translatable("Working: %" +  Math.round(((float)currentSection / maxChunks) * 100f)), true);
+                    player.sendOverlayMessage(Component.translatable("Working: %" +  Math.round(((float)currentSection / maxChunks) * 100f)));
                 }
             }
             mutableChunk.set(mutableChunk.getX(), mutableChunk.getY(), pos.getZ() >> 4); // Set back to start of row
@@ -179,7 +179,7 @@ public class SpawnMobsCommand {
 
         for(int mobIndex = 1; mobIndex <= entities.size(); mobIndex++) {
             if(player != null) {
-                player.displayClientMessage(Component.literal("Spawning mobs"), true);
+                player.sendOverlayMessage(Component.literal("Spawning mobs"));
             }
 
             Entity entity = entities.get(mobIndex - 1);

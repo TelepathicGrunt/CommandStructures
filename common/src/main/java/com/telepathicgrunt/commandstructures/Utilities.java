@@ -22,7 +22,7 @@ public final class Utilities {
             for(int x = -viewDistance; x <= viewDistance; x++) {
                 for(int z = -viewDistance; z <= viewDistance; z++) {
                     if(x + z < viewDistance) {
-                        ChunkAccess chunkAccess = level.getChunk(new ChunkPos(player.chunkPosition().x + x, player.chunkPosition().z + z).getWorldPosition());
+                        ChunkAccess chunkAccess = level.getChunk(new ChunkPos(player.chunkPosition().x() + x, player.chunkPosition().z() + z).getWorldPosition());
                         if(chunkAccess instanceof LevelChunk levelChunk) {
                             new ClientboundLevelChunkWithLightPacket(levelChunk, level.getLightEngine(), null, null);
                         }

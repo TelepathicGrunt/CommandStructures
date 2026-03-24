@@ -231,7 +231,7 @@ public class SpawnPiecesCommand {
 
                 currentSection++;
                 if(player != null) {
-                    player.displayClientMessage(Component.translatable("Working: %" +  Math.round(((float)currentSection / maxChunks) * 100f)), true);
+                    player.sendOverlayMessage(Component.translatable("Working: %" +  Math.round(((float)currentSection / maxChunks) * 100f)));
                 }
 
                 mutableChunk.move(0, 0, 1);
@@ -260,7 +260,7 @@ public class SpawnPiecesCommand {
 
         for(int pieceIndex = 1; pieceIndex <= nbtRLs.size(); pieceIndex++) {
             if(player != null) {
-                player.displayClientMessage(Component.literal("Working making structure: " + nbtRLs.get(pieceIndex - 1)), true);
+                player.sendOverlayMessage(Component.literal("Working making structure: " + nbtRLs.get(pieceIndex - 1)));
             }
 
             world.setBlock(mutable, Blocks.STRUCTURE_BLOCK.defaultBlockState().setValue(StructureBlock.MODE, StructureMode.LOAD), 3);
@@ -302,7 +302,7 @@ public class SpawnPiecesCommand {
                 for (int z = 0; z < template.getSize().getZ(); z++) {
                     for(int y = 0; y < template.getSize().getY(); y++) {
                         mutable.set(startSpot).move(x, y + 1, z);
-                        if(chunk.getPos().x != mutable.getX() >> 4 || chunk.getPos().z != mutable.getZ() >> 4) {
+                        if(chunk.getPos().x() != mutable.getX() >> 4 || chunk.getPos().z() != mutable.getZ() >> 4) {
                             chunk = world.getChunk(mutable);
                         }
 

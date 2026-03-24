@@ -51,7 +51,9 @@ public class FillStructureVoidCommand {
         Player player = cs.getSource().getEntity() instanceof Player player1 ? player1 : null;
         BlockPos originPos = coordinates.getBlockPos(cs.getSource());
 
-        player.displayClientMessage(Component.translatable("Working..."), true);
+        if (player != null) {
+            player.sendOverlayMessage(Component.translatable("Working..."));
+        }
 
         UnsafeBulkSectionAccess sectionAccess = new UnsafeBulkSectionAccess(level);
         Queue<BlockPos> posQueue = new LinkedList<>();
@@ -75,6 +77,8 @@ public class FillStructureVoidCommand {
             }
         }
 
-        player.displayClientMessage(Component.translatable("Done!"), true);
+        if (player != null) {
+            player.sendOverlayMessage(Component.translatable("Done!"));
+        }
     }
 }
