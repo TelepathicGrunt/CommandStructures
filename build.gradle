@@ -33,7 +33,16 @@ subprojects {
     version = "${rootProject.mod_version}+${rootProject.minecraft_version}"
 
     repositories {
-        maven { url = 'https://maven.teamresourceful.com/repository/maven-releases' }
+        exclusiveContent {
+            forRepository {
+                maven {
+                    url = "https://nexus.resourcefulbees.com/repository/telepathicgrunt/"
+                }
+            }
+            filter {
+                includeGroupAndSubgroups("com.telepathicgrunt")
+            }
+        }
     }
 
     dependencies {
