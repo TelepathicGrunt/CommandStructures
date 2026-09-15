@@ -160,7 +160,7 @@ public class SpawnPiecesCommand {
 
         if (spacing <= -1) {
             for (Identifier nbtRL : nbtRLs) {
-                Optional<StructureTemplate> optionalStructureTemplate = level.getServer().getStructureManager().get(nbtRL);
+                Optional<StructureTemplate> optionalStructureTemplate = level.getServer().getStructureTemplateManager().get(nbtRL);
                 if (optionalStructureTemplate.isPresent()) {
                     StructureTemplate structureTemplate = optionalStructureTemplate.get();
                     spacing = Math.max(Math.max(spacing, structureTemplate.getSize().getX()), structureTemplate.getSize().getZ());
@@ -293,7 +293,7 @@ public class SpawnPiecesCommand {
 
     // Needed so that structure void is preserved in structure pieces.
     private static void fillStructureVoidSpace(ServerLevel world, Identifier resourceLocation, BlockPos startSpot) {
-        StructureTemplateManager structuremanager = world.getStructureManager();
+        StructureTemplateManager structuremanager = world.getStructureTemplateManager();
         Optional<StructureTemplate> optional = structuremanager.get(resourceLocation);
         optional.ifPresent(template -> {
             BlockPos.MutableBlockPos mutable = startSpot.mutable();

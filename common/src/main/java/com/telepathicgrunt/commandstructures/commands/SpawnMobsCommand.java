@@ -186,7 +186,7 @@ public class SpawnMobsCommand {
             if (entity != null) {
                 entity.setPos(Vec3.atCenterOf(mutable.above()));
                 entity.setNoGravity(true);
-                entity.setInvulnerable(true);
+                entity.setInvulnerableTime(Integer.MAX_VALUE);
                 entity.noPhysics = true;
                 if (entity instanceof Mob mob) {
                     mob.setPersistenceRequired();

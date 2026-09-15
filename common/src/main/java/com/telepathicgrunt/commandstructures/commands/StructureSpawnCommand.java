@@ -26,12 +26,14 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.biome.Climate;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.LegacyRandomSource;
 import net.minecraft.world.level.levelgen.RandomSupport;
 import net.minecraft.world.level.levelgen.WorldgenRandom;
 import net.minecraft.world.level.levelgen.XoroshiroRandomSource;
+import net.minecraft.world.level.levelgen.densityfunction.SamplerContext;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.PoolElementStructurePiece;
 import net.minecraft.world.level.levelgen.structure.Structure;
@@ -124,16 +126,18 @@ public class StructureSpawnCommand {
 
         long finalSeed = randomSeed == null ? level.getSeed() : randomSeed;
         ChunkPos chunkPos = randomSeed == null ? ChunkPos.containing(centerPos) : new ChunkPos(0, 0);
+        Climate.Sampler climateSampler = level.getChunkSource().randomState().createClimateSampler(SamplerContext.builder().enableCaches().build());
         Structure.GenerationContext newGenerationContext = new Structure.GenerationContext(
                 level.registryAccess(),
                 level.getChunkSource().getGenerator(),
                 level.getChunkSource().getGenerator().getBiomeSource(),
+                climateSampler,
                 level.getChunkSource().randomState(),
-                level.getStructureManager(),
+                level.getStructureTemplateManager(),
                 finalSeed,
                 chunkPos,
                 level,
-                (biomeHolder) -> true
+                (_) -> true
         );
 
         Optional<Structure.GenerationStub> pieceGenerator = JigsawPlacement.addPieces(

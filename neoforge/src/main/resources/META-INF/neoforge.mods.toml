@@ -9,8 +9,7 @@ sourcesUrl="${sources_url}"
     version="${version}"
     displayName="${mod_display_name}"
     displayURL="${homepage_url}"
-    logoFile="commandstructures.png"
-    logoBlur=false
+    bannerFile="commandstructures.png"
     authors="TelepathicGrunt"
     description='''${mod_description}'''
 

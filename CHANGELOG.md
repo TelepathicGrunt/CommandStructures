@@ -1,4 +1,4 @@
-## **(V.4.4.5 Changes) (26.1 Minecraft)**
+## **(V.4.4.5 Changes) (26.3 Minecraft)**
 
-##### Misc:
-Fixed rare potential race condition issue with ServiceLoaders loading.
+##### Major:
+Updated to 26.3
