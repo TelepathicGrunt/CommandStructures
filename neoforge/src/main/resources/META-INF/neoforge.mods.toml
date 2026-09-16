@@ -10,6 +10,7 @@ sourcesUrl="${sources_url}"
     displayName="${mod_display_name}"
     displayURL="${homepage_url}"
     bannerFile="commandstructures.png"
+    iconFile="commandstructures.png"
     authors="TelepathicGrunt"
     description='''${mod_description}'''
 
